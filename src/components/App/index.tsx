@@ -31,9 +31,7 @@ const App = (): JSX.Element => {
     <MapContext.Provider value={esriMapView}>
       <div className={classes.app}>
         <Toolbar />
-        <MapContainer>
-          <div>cat</div>
-        </MapContainer>
+        <MapContainer />
       </div>
     </MapContext.Provider>
 
