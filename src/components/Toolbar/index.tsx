@@ -1,9 +1,9 @@
-import MapView from "@arcgis/core/views/MapView";
-import React, {useContext} from "react";
+import React, { useContext } from "react";
 import MapContext from "../MapContext";
 import useStyles from "./use-styles";
 
-const ESRI_BASEMAPS = ["satellite",
+const ESRI_BASEMAPS = [
+  "satellite",
   "hybrid",
   "oceans",
   "osm",
@@ -14,7 +14,8 @@ const ESRI_BASEMAPS = ["satellite",
   "streets-night-vector",
   "streets-navigation-vector",
   "topo-vector",
-  "streets-relief-vector"]
+  "streets-relief-vector"
+];
 
 const Toolbar = (): JSX.Element => {
   const classes = useStyles();
@@ -27,22 +28,22 @@ const Toolbar = (): JSX.Element => {
     }
   };
 
-  return(
+  return (
     <div className={classes.sidebar}>
       <div className={classes.title}>Esri-act</div>
       <div className={classes.basemapButtons}>
-      {
-        ESRI_BASEMAPS.map((basemap) => (
-          <button
-            onClick={() => handleBasemapChange(basemap)}
-          >
-            {basemap.toUpperCase()}
-          </button>
-        ))
-      }
+        {
+          ESRI_BASEMAPS.map((basemap) => (
+            <button
+              onClick={() => handleBasemapChange(basemap)}
+            >
+              {basemap.toUpperCase()}
+            </button>
+          ))
+        }
       </div>
     </div>
-  )
+  );
 };
 
-export default Toolbar
+export default Toolbar;
