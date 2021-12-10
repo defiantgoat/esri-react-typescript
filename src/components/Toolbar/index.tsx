@@ -30,14 +30,14 @@ const Toolbar = (): JSX.Element => {
 
   return (
     <div className={classes.sidebar}>
-      <div className={classes.title}>Esri-act</div>
+      <div className={classes.title}>EsriAct</div>
       <div className={classes.basemapButtons}>
         {
           ESRI_BASEMAPS.map((basemap) => (
             <button
               onClick={() => handleBasemapChange(basemap)}
             >
-              {basemap.toUpperCase()}
+              {basemap.toUpperCase().replace(/-/g, " ")}
             </button>
           ))
         }

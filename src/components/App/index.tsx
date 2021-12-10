@@ -20,8 +20,8 @@ const App = (): JSX.Element => {
     const view = new EsriMapView({
       map,
       container: "mapContainer",
-      center: [-77.0369, 38.9072],
-      zoom: 13
+      center: [-77.0910, 38.8816],
+      zoom: 15
     });
 
     setEsriMapView(view);
