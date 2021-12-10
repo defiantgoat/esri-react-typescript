@@ -1,2 +1,2 @@
 # esri-react-typescript
-An esri react typescript boilerplate
+An esri react typescript sample
