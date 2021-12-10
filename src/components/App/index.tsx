@@ -34,8 +34,7 @@ const App = (): JSX.Element => {
         <MapContainer />
       </div>
     </MapContext.Provider>
-
-  )
+  );
 };
 
 export default App;
