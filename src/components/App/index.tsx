@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useState} from "react";
+import React, { useLayoutEffect, useState } from "react";
 import EsriMap from "@arcgis/core/Map";
 import EsriMapView from "@arcgis/core/views/MapView";
 import MapContainer from "../MapContainer";
@@ -14,19 +14,19 @@ const App = (): JSX.Element => {
 
   useLayoutEffect(() => {
     const map = new EsriMap({
-      basemap: "dark-gray-vector"
+      basemap: "dark-gray-vector",
     });
 
     const view = new EsriMapView({
       map,
       container: "mapContainer",
-      center: [-77.0910, 38.8816],
-      zoom: 12
+      center: [-77.091, 38.8816],
+      zoom: 12,
     });
 
     setEsriMapView(view);
   }, []);
-  
+
   return (
     <MapContext.Provider value={esriMapView}>
       <div className={classes.app}>

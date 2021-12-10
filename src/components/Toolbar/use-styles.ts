@@ -1,22 +1,22 @@
-import {createUseStyles} from 'react-jss';
+import { createUseStyles } from "react-jss";
 
 const useStyles = createUseStyles({
   sidebar: {
-    backgroundColor: 'lightblue',
-    flexBasis: '33%',
+    backgroundColor: "lightblue",
+    flexBasis: "33%",
     maxWidth: "300px",
     flexShrink: 0,
     display: "flex",
     flexDirection: "column",
     gap: "12px",
     padding: "1rem",
-    borderRight: "5px solid #fff"
+    borderRight: "5px solid #fff",
   },
   title: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: "1.9em",
     fontWeight: 600,
-    color: "darkblue"
+    color: "darkblue",
   },
   basemapButtons: {
     display: "flex",
@@ -30,9 +30,9 @@ const useStyles = createUseStyles({
       fontSize: "1.1em",
       cursor: "pointer",
       fontWeight: 200,
-      padding: ".5em"
-    }
-  }
+      padding: ".5em",
+    },
+  },
 });
 
 export default useStyles;

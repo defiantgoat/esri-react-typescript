@@ -14,7 +14,7 @@ const ESRI_BASEMAPS = [
   "streets-night-vector",
   "streets-navigation-vector",
   "topo-vector",
-  "streets-relief-vector"
+  "streets-relief-vector",
 ];
 
 const Toolbar = (): JSX.Element => {
@@ -32,15 +32,11 @@ const Toolbar = (): JSX.Element => {
     <div className={classes.sidebar}>
       <div className={classes.title}>EsriAct</div>
       <div className={classes.basemapButtons}>
-        {
-          ESRI_BASEMAPS.map((basemap) => (
-            <button
-              onClick={() => handleBasemapChange(basemap)}
-            >
-              {basemap.toUpperCase().replace(/-/g, " ")}
-            </button>
-          ))
-        }
+        {ESRI_BASEMAPS.map((basemap) => (
+          <button onClick={() => handleBasemapChange(basemap)}>
+            {basemap.toUpperCase().replace(/-/g, " ")}
+          </button>
+        ))}
       </div>
     </div>
   );

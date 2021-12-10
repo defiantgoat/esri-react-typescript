@@ -7,6 +7,7 @@
   "author": "Jayson Ward <defiantgoat@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "format": "yarn prettier --write .",
     "develop": "webpack-dev-server --mode development --open --hot",
     "build": "rm -rf dist && npx webpack"
   },
@@ -22,6 +23,7 @@
     "css-loader": "^6.5.1",
     "html-webpack-plugin": "^5.5.0",
     "modern-normalize": "^1.1.0",
+    "prettier": "^2.5.1",
     "react-jss": "^10.9.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
