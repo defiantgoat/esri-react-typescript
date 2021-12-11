@@ -7,6 +7,7 @@
   "author": "Jayson Ward <defiantgoat@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "test": "DEBUG_PRINT_LIMIT=20000 jest --runInBand --detectOpenHandles --config jest.config.json",
     "format": "yarn prettier --write .",
     "develop": "webpack-dev-server --mode development --open --hot",
     "build": "rm -rf dist && npx webpack"
@@ -17,15 +18,24 @@
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@testing-library/react": "^12.1.2",
     "@types/arcgis-js-api": "^4.22.0",
+    "@types/jest": "^27.0.3",
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.3",
+    "babel-jest": "^27.4.4",
     "css-loader": "^6.5.1",
     "html-webpack-plugin": "^5.5.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^27.4.4",
+    "jest-canvas-mock": "^2.3.1",
     "modern-normalize": "^1.1.0",
     "prettier": "^2.5.1",
     "react-jss": "^10.9.0",
     "style-loader": "^3.3.1",
+    "ts-jest": "^27.1.1",
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.2",
     "webpack": "^5.65.0",
