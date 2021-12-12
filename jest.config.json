@@ -1,4 +1,7 @@
 {
+  "setupFiles": [
+    "jest-canvas-mock"
+  ],
   "transform": {
     "^.+\\.(js|jsx|ts|tsx)?$": "ts-jest"
   },
