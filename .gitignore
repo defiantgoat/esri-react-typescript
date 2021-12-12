@@ -2,3 +2,4 @@ node_modules
 dist
 src/keys.ts
 .DS_Store
+coverage
