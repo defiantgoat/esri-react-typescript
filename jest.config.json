@@ -1,25 +1,24 @@
-
 {
   "setupFiles": [
     "jest-canvas-mock"
   ],
   "transform": {
-    "^.+\\.(ts|tsx)?$": "ts-jest",
-    "^.+\\.(js|jsx)?$": ["babel-jest", {"rootMode": "upward"}]
+    "^.+\\.(js|jsx|ts|tsx)?$": "ts-jest"
   },
-  "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-  "transformIgnorePatterns": [
-    "node_modules/(?!@arcgis)"
-  ],
+  "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js|jsx)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
   "moduleNameMapper": {
     ".+\\.(css|scss)$": "identity-obj-proxy"
   },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(@arcgis|@esri|@stencil)/)"
+  ],
+  "testEnvironment": "jsdom",
   "collectCoverage": true,
   "coverageDirectory": "./coverage",
   "collectCoverageFrom": [
     "src/**/*.(ts|tsx|js)",
-    "!src/index.tsx",
+    "!src/client/index.tsx",
     "!src/tests/*"
   ],
   "coverageThreshold": {
