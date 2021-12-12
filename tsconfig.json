@@ -12,6 +12,7 @@
     "strictNullChecks": true,
     "removeComments": true,
     "outDir": "./dist/",
+    "allowJs": true,
     "typeRoots": [
       "src/types",
       "./node_modules/@types"
