@@ -18,7 +18,8 @@
   "coverageDirectory": "./coverage",
   "collectCoverageFrom": [
     "src/**/*.(ts|tsx|js)",
-    "!src/client/index.tsx",
+    "!src/keys.ts",
+    "!src/index.tsx",
     "!src/tests/*"
   ],
   "coverageThreshold": {

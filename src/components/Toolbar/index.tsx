@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import MapContext from "../MapContext";
 import useStyles from "./use-styles";
 
-const ESRI_BASEMAPS = [
+export const ESRI_BASEMAPS = [
   "satellite",
   "hybrid",
   "oceans",
@@ -33,7 +33,10 @@ const Toolbar = (): JSX.Element => {
       <div className={classes.title}>EsriAct</div>
       <div className={classes.basemapButtons}>
         {ESRI_BASEMAPS.map((basemap) => (
-          <button onClick={() => handleBasemapChange(basemap)}>
+          <button
+            key={`button-${basemap}`}
+            onClick={() => handleBasemapChange(basemap)}
+          >
             {basemap.toUpperCase().replace(/-/g, " ")}
           </button>
         ))}
