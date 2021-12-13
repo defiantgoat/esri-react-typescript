@@ -12,11 +12,11 @@ jest.mock("@arcgis/core/core/uuid.js", () => ({
 jest.mock("@arcgis/core/Map");
 jest.mock("@arcgis/core/views/MapView");
 
-const setBasemap = jest.fn();
+const setMock = jest.fn();
 
 Map.mockImplementation(() => ({
   basemap: "dark-gray-vector",
-  set: setBasemap,
+  set: setMock,
 }));
 
 MapView.mockImplementation(() => ({
@@ -61,6 +61,6 @@ describe("Toolbar", () => {
       fireEvent.click(satelliteButton);
     });
 
-    expect(setBasemap).toHaveBeenCalledWith("basemap", "satellite");
+    expect(setMock).toHaveBeenCalledWith("basemap", "satellite");
   });
 });
