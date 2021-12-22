@@ -4,7 +4,7 @@ import EsriMapView from "@arcgis/core/views/MapView";
 import MapContainer from "../MapContainer";
 import Toolbar from "../Toolbar";
 import MapContext from "../MapContext";
-import { ESRI_API_KEY } from "../../keys";
+// import { ESRI_API_KEY } from "../../keys";
 
 import useStyles from "./use-styles";
 
