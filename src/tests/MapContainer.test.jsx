@@ -4,13 +4,10 @@ import MapContainer from "../components/MapContainer";
 
 describe("MapContainer", () => {
   it("is rendered", () => {
-
-    const { container, debug } = render(
-      <MapContainer />
-    );
+    const { container, debug } = render(<MapContainer />);
 
     expect(container).not.toBeUndefined();
     const [mapDiv] = container.children;
-    expect(mapDiv.getAttribute("id")).toEqual("mapContainer")  
+    expect(mapDiv.getAttribute("id")).toEqual("mapContainer");
   });
 });

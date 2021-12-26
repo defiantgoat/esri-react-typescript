@@ -32,6 +32,10 @@ const useStyles = createUseStyles({
       fontWeight: 200,
       padding: ".5em",
     },
+    "& button:hover": {
+      backgroundColor: "darkblue",
+      color: "aliceblue"
+    }
   },
 });
 
