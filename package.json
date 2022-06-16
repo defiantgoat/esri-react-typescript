@@ -1,43 +1,32 @@
 {
-  "name": "esri-react-typescript",
-  "version": "1.0.0",
-  "description": "an esri react typescript",
-  "main": "./src/index.tsx",
-  "repository": "https://github.com/defiantgoat/esri-react-typescript.git",
-  "author": "Jayson Ward <defiantgoat@gmail.com>",
-  "license": "MIT",
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
   "scripts": {
-    "test": "jest --config jest.config.json",
-    "format": "yarn prettier --write .",
-    "develop": "webpack-dev-server --mode development --open --hot",
-    "build": "rm -rf dist && npx webpack"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "jest --config jest.config.json"
   },
   "dependencies": {
     "@arcgis/core": "^4.21.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^12.1.2",
+    "@testing-library/react": "^13.3.0",
     "@types/arcgis-js-api": "^4.22.0",
-    "@types/jest": "^27.0.3",
-    "@types/react": "^17.0.3",
-    "@types/react-dom": "^17.0.3",
-    "babel-jest": "^27.4.4",
-    "css-loader": "^6.5.1",
-    "html-webpack-plugin": "^5.5.0",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "^27.4.4",
+    "@types/jest": "^28.1.1",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^1.3.0",
+    "jest": "^28.1.1",
     "jest-canvas-mock": "^2.3.1",
+    "jest-environment-jsdom": "^28.1.1",
     "modern-normalize": "^1.1.0",
-    "prettier": "^2.5.1",
     "react-jss": "^10.9.0",
-    "style-loader": "^3.3.1",
-    "ts-jest": "^27.1.1",
-    "ts-loader": "^9.2.6",
-    "typescript": "^4.5.2",
-    "webpack": "^5.65.0",
-    "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.6.0"
+    "ts-jest": "^28.0.5",
+    "typescript": "^4.6.3",
+    "vite": "^2.9.9"
   }
 }

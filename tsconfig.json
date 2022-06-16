@@ -1,5 +1,14 @@
-{    
+{
   "compilerOptions": {
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "module": "commonjs",
     "target": "es6",
     "jsx": "react",
@@ -18,13 +27,11 @@
       "./node_modules/@types"
     ]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
+  "include": ["src"],
   "exclude": [
-      "node_modules",
-      "**/*.spec.ts",
-      "**/*.test.ts"
-  ]
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
