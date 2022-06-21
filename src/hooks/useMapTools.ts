@@ -1,9 +1,12 @@
 import { useContext } from "react";
 import MapContext from "../components/MapContext";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import Layer from "@arcgis/core/layers/Layer";
 
 const useMapTools = () => {
   const mapViewContext = useContext(MapContext) as any;
+
+  const _findLayer = (id: string): Layer | null => mapViewContext?.map.allLayers.find((layer) => layer.id === id);
 
   const changeBasemap = (basemap: string): void => {
     if (mapViewContext) {
@@ -17,25 +20,33 @@ const useMapTools = () => {
     type: string;
     id: string;
   }) => {
-    if (mapViewContext) {
       const { url, title, type, id } = layerConfig;
-
       if (type === "FeatureLayer") {
         const featureLayer = new FeatureLayer({
           url,
           id,
           title,
         });
-        mapViewContext.map.add(featureLayer);
+
+        mapViewContext?.map.add(featureLayer);
       }
-    }
   };
 
   const removeLayer = (id: string) => {};
 
-  const hideLayer = (id: string) => {};
+  const hideLayer = (id: string) => {
+    const layer = _findLayer(id);
+    if (layer) {
+      layer.visible = false;
+    }
+  };
 
-  const showLayer = (id: string) => {};
+  const showLayer = (id: string) => {
+    const layer = _findLayer(id);
+    if (layer) {
+      layer.visible = true;
+    }
+  };
 
   return {
     changeBasemap,
