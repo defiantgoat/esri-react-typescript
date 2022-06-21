@@ -31,6 +31,7 @@ const App = (): JSX.Element => {
     });
 
     setEsriMapView(view);
+
   }, []);
 
   return (

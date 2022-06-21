@@ -1,32 +1,12 @@
-import React, { useContext } from "react";
-import MapContext from "../MapContext";
+import React from "react";
 import useStyles from "./use-styles";
+import useMapTools from "../../hooks/useMapTools";
+import {ESRI_BASEMAPS} from "../../config";
 
-export const ESRI_BASEMAPS = [
-  "satellite",
-  "hybrid",
-  "oceans",
-  "osm",
-  "terrain",
-  "dark-gray-vector",
-  "gray-vector",
-  "streets-vector",
-  "streets-night-vector",
-  "streets-navigation-vector",
-  "topo-vector",
-  "streets-relief-vector",
-];
 
 const Toolbar = (): JSX.Element => {
   const classes = useStyles();
-
-  const mapViewContext = useContext(MapContext) as any;
-
-  const handleBasemapChange = (basemap: string) => {
-    if (mapViewContext) {
-      mapViewContext.map.set("basemap", basemap);
-    }
-  };
+  const {changeBasemap} = useMapTools();
 
   return (
     <div className={classes.sidebar}>
@@ -35,7 +15,7 @@ const Toolbar = (): JSX.Element => {
         {ESRI_BASEMAPS.map((basemap) => (
           <button
             key={`button-${basemap}`}
-            onClick={() => handleBasemapChange(basemap)}
+            onClick={() => changeBasemap(basemap)}
           >
             {basemap.toUpperCase().replace(/-/g, " ")}
           </button>
