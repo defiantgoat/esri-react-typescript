@@ -11,40 +11,38 @@ const useMapTools = () => {
     }
   };
 
-  const addLayer = (layerConfig: {url: string, title: string, type: string, id: string}) => {
+  const addLayer = (layerConfig: {
+    url: string;
+    title: string;
+    type: string;
+    id: string;
+  }) => {
     if (mapViewContext) {
-      const {url, title, type, id} = layerConfig;
-      
+      const { url, title, type, id } = layerConfig;
+
       if (type === "FeatureLayer") {
         const featureLayer = new FeatureLayer({
           url,
           id,
-          title
+          title,
         });
         mapViewContext.map.add(featureLayer);
       }
-      
     }
   };
 
-  const removeLayer = (id: string) => {
+  const removeLayer = (id: string) => {};
 
-  };
+  const hideLayer = (id: string) => {};
 
-  const hideLayer = (id: string) => {
-
-  };
-
-  const showLayer = (id: string) => {
-
-  };
+  const showLayer = (id: string) => {};
 
   return {
     changeBasemap,
     addLayer,
     removeLayer,
     hideLayer,
-    showLayer
+    showLayer,
   };
 };
 

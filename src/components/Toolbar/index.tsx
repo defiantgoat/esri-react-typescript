@@ -1,12 +1,11 @@
 import React from "react";
 import useStyles from "./use-styles";
 import useMapTools from "../../hooks/useMapTools";
-import {ESRI_BASEMAPS} from "../../config";
-
+import { ESRI_BASEMAPS } from "../../config";
 
 const Toolbar = (): JSX.Element => {
   const classes = useStyles();
-  const {changeBasemap} = useMapTools();
+  const { changeBasemap } = useMapTools();
 
   return (
     <div className={classes.sidebar}>

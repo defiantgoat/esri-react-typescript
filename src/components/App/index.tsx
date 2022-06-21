@@ -14,7 +14,7 @@ const App = (): JSX.Element => {
   const [esriMapView, setEsriMapView] = useState(null as any);
 
   useLayoutEffect(() => {
-    const {BASEMAP, CENTER, ZOOM} = MAP_DEFAULTS;
+    const { BASEMAP, CENTER, ZOOM } = MAP_DEFAULTS;
 
     const map = new EsriMap({
       basemap: BASEMAP,
@@ -26,12 +26,11 @@ const App = (): JSX.Element => {
       center: CENTER,
       zoom: ZOOM,
       ui: {
-        components: ["zoom"]
-      }
+        components: ["zoom"],
+      },
     });
 
     setEsriMapView(view);
-
   }, []);
 
   return (

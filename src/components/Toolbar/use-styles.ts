@@ -34,8 +34,8 @@ const useStyles = createUseStyles({
     },
     "& button:hover": {
       backgroundColor: "darkblue",
-      color: "aliceblue"
-    }
+      color: "aliceblue",
+    },
   },
 });
 
