@@ -19,78 +19,47 @@ const useMapTools = () => {
   };
 
   const addLayer = (layerConfig: LayerConfig) => {
-    const { url, title, type, id, renderer, sublayers, visible } = layerConfig;
+    const { url, title, type, id, renderer, sublayers } = layerConfig;
+    let layer = null as FeatureLayer | CSVLayer | MapImageLayer | null;
 
     switch (type) {
       case ESRI_LAYER_TYPES.FeatureLayer:
-        const featureLayer = new FeatureLayer({
+        layer = new FeatureLayer({
           url,
           id,
           title,
         });
 
-        if (renderer) {
-          featureLayer.renderer = renderer;
-        }
-
-        mapViewContext?.map.add(featureLayer);
         break;
 
       case ESRI_LAYER_TYPES.MapImageLayer:
-        const mapImageLayer = new MapImageLayer({
+        layer = new MapImageLayer({
           url,
           id,
           title,
         });
 
-        if (sublayers) {
-          mapImageLayer.sublayers = sublayers as any;
-        }
-
-        mapViewContext?.map.add(mapImageLayer);
         break;
 
       case ESRI_LAYER_TYPES.CVSLayer:
-        const csvLayer = new CSVLayer({ url, id, title });
-        if (renderer) {
-          console.log(renderer)
-          csvLayer.renderer = renderer;
-        }
-        mapViewContext?.map.add(csvLayer);
+        layer = new CSVLayer({ url, id, title });
+        break;
 
       default:
         break;
     }
 
-    // if (type === "FeatureLayer") {
-    //   const featureLayer = new FeatureLayer({
-    //     url,
-    //     id,
-    //     title,
-    //   });
+    if (layer) {
+      if (renderer && !(layer instanceof MapImageLayer)) {
+        layer.renderer = renderer(mapViewContext?.scale);
+      }
 
-    //   if (renderer) {
-    //     featureLayer.renderer = renderer;
-    //   }
+      if (sublayers && layer instanceof MapImageLayer) {
+        layer.sublayers = sublayers as any;
+      }
 
-    //   mapViewContext?.map.add(featureLayer);
-    // }
-    // if (type === "MapImageLayer") {
-    //   const mapImageLayer = new MapImageLayer({
-    //     url,
-    //     id,
-    //     title,
-    //   });
-
-    //   if (sublayers) {
-    //     mapImageLayer.sublayers = sublayers as any;
-    //   }
-
-    //   mapViewContext?.map.add(mapImageLayer);
-    // }
-    // if (type === "CVSLayer") {
-
-    // }
+      mapViewContext?.map.add(layer);
+    }
   };
 
   const removeLayer = (id: string) => {};

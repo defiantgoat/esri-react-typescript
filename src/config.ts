@@ -1,4 +1,4 @@
-import { simpleFill, simpleLine, cimSymbol, heatmap, uniqueValue } from "./renderers";
+import { simpleFill, simpleLine, cimSymbol, heatmap, uniqueValue, dotDensity } from "./renderers";
 
 type EsriLayer = "FeatureLayer"
 | "MapImageLayer"
@@ -79,17 +79,70 @@ export const LAYER_IDS = {
   CensusBlocks: "census_blocks",
   MvConservationAreas: "mv_conservation_areas",
   MvTrails: "mv_trails",
-  MvPois: "mv_pois",
-  Earthquakes: "earthquakes"
+  MvBusStops: "mv_pois",
+  Earthquakes: "earthquakes",
+  Population: "population"
 };
 
 export const LAYERS_CONFIG: LayersConfig = {
+  [LAYER_IDS.Population]: {
+    url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2",
+    id: LAYER_IDS.Population,
+    title: "Population",
+    type: ESRI_LAYER_TYPES.FeatureLayer,
+    renderer: (referenceScale: number) => dotDensity({
+      referenceScale, 
+      attributes: [
+        {
+          field: "B03002_003E",
+          color: "#f23c3f",
+          label: "White (non-Hispanic)"
+        },
+        {
+          field: "B03002_012E",
+          color: "#e8ca0d",
+          label: "Hispanic"
+        },
+        {
+          field: "B03002_004E",
+          color: "#00b6f1",
+          label: "Black or African American"
+        },
+        {
+          field: "B03002_006E",
+          color: "#32ef94",
+          label: "Asian"
+        },
+        {
+          field: "B03002_005E",
+          color: "#ff7fe9",
+          label: "American Indian/Alaskan Native"
+        },
+        {
+          field: "B03002_007E",
+          color: "#e2c4a5",
+          label: "Pacific Islander/Hawaiian Native"
+        },
+        {
+          field: "B03002_008E",
+          color: "#ff6a00",
+          label: "Other race"
+        },
+        {
+          field: "B03002_009E",
+          color: "#96f7ef",
+          label: "Two or more races"
+        }
+      ],
+      dotValue: 100
+    })
+  },
   [LAYER_IDS.Earthquakes]: {
     url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.csv",
     id: LAYER_IDS.Earthquakes,
     type: ESRI_LAYER_TYPES.CVSLayer,
     title: "Earthquakes",
-    renderer: heatmap({
+    renderer: () => heatmap({
       field: "mag",
       colorStops: [
       { color: "rgba(63, 40, 102, 0)", ratio: 0 },
@@ -114,7 +167,7 @@ export const LAYERS_CONFIG: LayersConfig = {
     title: "Seattle Demographcs",
     id: LAYER_IDS.SeattleDemographics,
     type: ESRI_LAYER_TYPES.FeatureLayer,
-    renderer: {
+    renderer: () => ({
       type: "simple",
       symbol: {
         type: "simple-fill",
@@ -124,7 +177,7 @@ export const LAYERS_CONFIG: LayersConfig = {
           width: 1, // points
         },
       },
-    },
+    }),
   },
   [LAYER_IDS.MvConservationAreas]: {
     url: "https://services1.arcgis.com/FNsEJ848HT5uDOHD/ArcGIS/rest/services/TrailsMV_Open_Space_Data_pv/FeatureServer/0",
@@ -133,12 +186,12 @@ export const LAYERS_CONFIG: LayersConfig = {
     type: ESRI_LAYER_TYPES.FeatureLayer,
   },
   [LAYER_IDS.MvTrails]: {
-    url: "https://services1.arcgis.com/FNsEJ848HT5uDOHD/ArcGIS/rest/services/Walking_Trails_-_TrailsMVApp_view/FeatureServer/0",
+    url: "https://services1.arcgis.com/FNsEJ848HT5uDOHD/ArcGIS/rest/services/BPAC_Trails/FeatureServer/1",
     title: "Trails",
     id: LAYER_IDS.MvTrails,
     type: ESRI_LAYER_TYPES.FeatureLayer,
-    renderer: uniqueValue({
-      field: "SURFACE",
+    renderer: () => uniqueValue({
+      field: "Surface",
       uniqueValueInfos: [
         {
           value: 2,
@@ -153,19 +206,18 @@ export const LAYERS_CONFIG: LayersConfig = {
           symbol: simpleLine({strokeColor: "orange", strokeWidth: "9px"}).symbol
         }
       ],
-      visualVariables: [
-        {
-          type: "opacity",
-          field: "PROP_ID",
-          stops: [
-            {value: 1, opacity: 0.1},
-            {value: 50, opacity: 0.5},
-            {value: 99, opacity: 0.9}
-          ]
-        }
-      ]
+      // visualVariables: [
+      //   {
+      //     type: "opacity",
+      //     field: "Prop_ID",
+      //     stops: [
+      //       {value: 1, opacity: 0.1},
+      //       {value: 50, opacity: 0.5},
+      //       {value: 99, opacity: 0.9}
+      //     ]
+      //   }
+      // ]
     }),
-    
     // renderer: simpleLine({
     //   strokeColor: [222, 111, 88, 1],
     //   strokeWidth: "3px",
@@ -180,7 +232,7 @@ export const LAYERS_CONFIG: LayersConfig = {
     sublayers: [
       {
         id: 2,
-        renderer: simpleFill({
+        renderer: () => simpleFill({
           fill: [0, 255, 255, 0.1],
           strokeColor: [0, 255, 255, 0.5],
           strokeWidth: 5,
@@ -188,7 +240,7 @@ export const LAYERS_CONFIG: LayersConfig = {
       },
       {
         id: 1,
-        renderer: simpleFill({
+        renderer: () => simpleFill({
           fill: [255, 255, 0, 0],
           strokeColor: [22, 66, 255, 0.5],
           strokeWidth: 3,
@@ -199,20 +251,21 @@ export const LAYERS_CONFIG: LayersConfig = {
       },
     ],
   },
-  [LAYER_IDS.MvPois]: {
-    url: "https://services1.arcgis.com/FNsEJ848HT5uDOHD/ArcGIS/rest/services/TrailsMV_POIs_pv/FeatureServer/0",
-    title: "POIs",
-    id: LAYER_IDS.MvPois,
+  [LAYER_IDS.MvBusStops]: {
+    url: "https://services1.arcgis.com/FNsEJ848HT5uDOHD/ArcGIS/rest/services/BusStops/FeatureServer/0",
+    title: "Bus Stops",
+    id: LAYER_IDS.MvBusStops,
     type: ESRI_LAYER_TYPES.FeatureLayer,
-    renderer: cimSymbol(),
+    renderer: () => cimSymbol(),
   },
 };
 
 export const MAP_LAYERS: string[] = [
+  LAYER_IDS.Population,
   // LAYER_IDS.SeattleDemographics,
   // LAYER_IDS.CensusBlocks,
-  // LAYER_IDS.MvConservationAreas,
+  LAYER_IDS.MvConservationAreas,
   LAYER_IDS.MvTrails,
-  // LAYER_IDS.MvPois,
+  LAYER_IDS.MvBusStops,
   // LAYER_IDS.Earthquakes
 ];

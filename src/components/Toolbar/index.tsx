@@ -9,11 +9,11 @@ const Toolbar = (): JSX.Element => {
   const { changeBasemap, hideLayer, setRenderer } = useMapTools();
 
   const dottedLine = useCallback(() => simpleLine({
-    strokeColor: [222, 111, 88, 1],
+    strokeColor: [200, 200, 200, 1],
     strokeWidth: "3px",
     strokeStyle: "short-dot",
  }), [simpleLine]);
- 
+
   return (
     <div className={classes.sidebar}>
       <div className={classes.title}>TrailsMV</div>
