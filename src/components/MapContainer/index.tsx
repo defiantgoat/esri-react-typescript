@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import useStyles from "./use-styles";
 import useMapTools from "../../hooks/useMapTools";
-import { MAP_LAYERS } from "../../config";
+import { MAP_LAYERS, LAYERS_CONFIG } from "../../config";
 
 interface MapContainerProps {
   children?: JSX.Element | JSX.Element[];
@@ -14,7 +14,13 @@ const MapContainer: React.FC<MapContainerProps> = ({
   const { addLayer } = useMapTools();
 
   useEffect(() => {
-    MAP_LAYERS.forEach((layerConfig) => addLayer(layerConfig));
+    MAP_LAYERS.forEach((layerId) => {
+      const config = LAYERS_CONFIG[layerId] || null;
+      console.log(config, layerId);
+      if (config) {
+        addLayer(config);
+      }
+    });
   }, [addLayer, MAP_LAYERS]);
 
   return (

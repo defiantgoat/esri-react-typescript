@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useState } from "react";
 import EsriMap from "@arcgis/core/Map";
 import EsriMapView from "@arcgis/core/views/MapView";
+import EsriSceneView from "@arcgis/core/views/SceneView";
 import MapContainer from "../MapContainer";
 import Toolbar from "../Toolbar";
 import MapContext from "../MapContext";
@@ -12,26 +13,44 @@ import useStyles from "./use-styles";
 const App = (): JSX.Element => {
   const classes = useStyles();
   const [esriMapView, setEsriMapView] = useState(null as any);
+  const [viewType, setViewType] = useState<"2D" | "3D">("2D");
 
   useLayoutEffect(() => {
     const { BASEMAP, CENTER, ZOOM } = MAP_DEFAULTS;
 
     const map = new EsriMap({
       basemap: BASEMAP,
+      ground: viewType !== "2D" ? "world-elevation" : undefined, //Elevation service
     });
 
-    const view = new EsriMapView({
-      map,
-      container: "mapContainer",
-      center: CENTER,
-      zoom: ZOOM,
-      ui: {
-        components: ["zoom"],
-      },
-    });
+    let view = null as any;
 
+    if (viewType === "2D") {
+      view = new EsriMapView({
+        map,
+        container: "mapContainer",
+        center: CENTER,
+        zoom: ZOOM,
+        ui: {
+          components: ["zoom"],
+        },
+      });
+    } else {
+      view = new EsriSceneView({
+        map,
+        container: "mapContainer",
+        camera: {
+          position: {
+            x: CENTER[0],
+            y: CENTER[1],
+            z: 2000,
+          },
+          tilt: 74,
+        },
+      });
+    }
     setEsriMapView(view);
-  }, []);
+  }, [viewType]);
 
   return (
     <MapContext.Provider value={esriMapView}>

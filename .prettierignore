@@ -3,3 +3,4 @@ coverage
 *.html
 *.json
 webpack.*
+dist
