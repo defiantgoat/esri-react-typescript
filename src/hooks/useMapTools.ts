@@ -2,8 +2,9 @@ import { useContext } from "react";
 import MapContext from "../components/MapContext";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
+import CSVLayer from "@arcgis/core/layers/CSVLayer";
 import Layer from "@arcgis/core/layers/Layer";
-import { LayerConfig } from "../config";
+import { LayerConfig, ESRI_LAYER_TYPES } from "../config";
 
 const useMapTools = () => {
   const mapViewContext = useContext(MapContext) as any;
@@ -20,32 +21,76 @@ const useMapTools = () => {
   const addLayer = (layerConfig: LayerConfig) => {
     const { url, title, type, id, renderer, sublayers, visible } = layerConfig;
 
-    if (type === "FeatureLayer") {
-      const featureLayer = new FeatureLayer({
-        url,
-        id,
-        title,
-      });
+    switch (type) {
+      case ESRI_LAYER_TYPES.FeatureLayer:
+        const featureLayer = new FeatureLayer({
+          url,
+          id,
+          title,
+        });
 
-      if (renderer) {
-        featureLayer.renderer = renderer;
-      }
+        if (renderer) {
+          featureLayer.renderer = renderer;
+        }
 
-      mapViewContext?.map.add(featureLayer);
+        mapViewContext?.map.add(featureLayer);
+        break;
+
+      case ESRI_LAYER_TYPES.MapImageLayer:
+        const mapImageLayer = new MapImageLayer({
+          url,
+          id,
+          title,
+        });
+
+        if (sublayers) {
+          mapImageLayer.sublayers = sublayers as any;
+        }
+
+        mapViewContext?.map.add(mapImageLayer);
+        break;
+
+      case ESRI_LAYER_TYPES.CVSLayer:
+        const csvLayer = new CSVLayer({ url, id, title });
+        if (renderer) {
+          console.log(renderer)
+          csvLayer.renderer = renderer;
+        }
+        mapViewContext?.map.add(csvLayer);
+
+      default:
+        break;
     }
-    if (type === "MapImageLayer") {
-      const mapImageLayer = new MapImageLayer({
-        url,
-        id,
-        title,
-      });
 
-      if (sublayers) {
-        mapImageLayer.sublayers = sublayers as any;
-      }
+    // if (type === "FeatureLayer") {
+    //   const featureLayer = new FeatureLayer({
+    //     url,
+    //     id,
+    //     title,
+    //   });
 
-      mapViewContext?.map.add(mapImageLayer);
-    }
+    //   if (renderer) {
+    //     featureLayer.renderer = renderer;
+    //   }
+
+    //   mapViewContext?.map.add(featureLayer);
+    // }
+    // if (type === "MapImageLayer") {
+    //   const mapImageLayer = new MapImageLayer({
+    //     url,
+    //     id,
+    //     title,
+    //   });
+
+    //   if (sublayers) {
+    //     mapImageLayer.sublayers = sublayers as any;
+    //   }
+
+    //   mapViewContext?.map.add(mapImageLayer);
+    // }
+    // if (type === "CVSLayer") {
+
+    // }
   };
 
   const removeLayer = (id: string) => {};
@@ -78,6 +123,7 @@ const useMapTools = () => {
     hideLayer,
     showLayer,
     findLayer,
+    setRenderer
   };
 };
 
