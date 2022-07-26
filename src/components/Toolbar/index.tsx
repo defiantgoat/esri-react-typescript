@@ -1,18 +1,22 @@
 import React, {useCallback} from "react";
 import useStyles from "./use-styles";
 import useMapTools from "../../hooks/useMapTools";
-import { ESRI_BASEMAPS, LAYER_IDS } from "../../config";
+import { ESRI_BASEMAPS, LAYER_IDS, populationDotDensity } from "../../config";
 import { simpleLine } from "../../renderers";
 
 const Toolbar = (): JSX.Element => {
   const classes = useStyles();
-  const { changeBasemap, hideLayer, setRenderer } = useMapTools();
+  const { setBasemap, hideLayer, setRenderer, getMapViewProperty } = useMapTools();
 
   const dottedLine = useCallback(() => simpleLine({
     strokeColor: [200, 200, 200, 1],
     strokeWidth: "3px",
     strokeStyle: "short-dot",
  }), [simpleLine]);
+
+ const dotDensityCallback = useCallback(() => {
+   return populationDotDensity(getMapViewProperty("scale"));
+  }, [populationDotDensity, getMapViewProperty])
 
   return (
     <div className={classes.sidebar}>
@@ -22,7 +26,7 @@ const Toolbar = (): JSX.Element => {
           <button
             key={`button-${basemap}`}
             onClick={() => {
-              changeBasemap(basemap);
+              setBasemap(basemap);
               hideLayer("pois");
             }}
           >
@@ -32,6 +36,9 @@ const Toolbar = (): JSX.Element => {
         <button onClick={() => {
           setRenderer(LAYER_IDS.MvTrails, dottedLine())
         }}>Update Trails Renderer</button>
+        <button onClick={() => {
+          setRenderer(LAYER_IDS.Population, dotDensityCallback())
+        }}>Update Population Renderer</button>
       </div>
     </div>
   );

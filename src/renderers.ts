@@ -24,20 +24,19 @@ export const heatmap = ({
   radius: radius || undefined,
 });
 
-export const dotDensity = ({attributes, referenceScale, dotValue}: {attributes: any[], referenceScale?: number, dotValue: number}) => ({
+export const pieChart = ({attributes}: {attributes: any[]}, otherProps = {}) => ({
+  type: "pie-chart",
+  attributes,
+  ...otherProps
+})
+
+export const dotDensity = ({attributes, referenceScale, dotValue}: {attributes: any[], referenceScale?: number, dotValue: number}, otherProps = {}) => ({
   type: "dot-density",
   dotValue,
   referenceScale: referenceScale || undefined,
-  attributes
+  attributes,
+  ...otherProps
 });
-
-// [
-//   { ratio: 0, color: "rgba(255, 255, 255, 0)" },
-//   { ratio: 0.2, color: "rgba(255, 255, 255, 1)" },
-//   { ratio: 0.5, color: "rgba(255, 140, 0, 1)" },
-//   { ratio: 0.8, color: "rgba(255, 140, 0, 1)" },
-//   { ratio: 1, color: "rgba(255, 0, 0, 1)" }
-// ]
 
 export const simpleFill = ({
   fill,

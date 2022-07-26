@@ -1,4 +1,4 @@
-import { simpleFill, simpleLine, cimSymbol, heatmap, uniqueValue, dotDensity } from "./renderers";
+import { simpleFill, simpleLine, cimSymbol, heatmap, uniqueValue, dotDensity, pieChart } from "./renderers";
 
 type EsriLayerType = "FeatureLayer"
 | "MapImageLayer"
@@ -16,6 +16,8 @@ export interface LayerConfig {
   renderer?: any;
   sublayers?: { id: number; renderer?: any }[];
   visible?: boolean;
+  popupTemplate?: any;
+  popupEnabled?: boolean;
 }
 
 type LayersConfig = Record<string, LayerConfig>;
@@ -49,6 +51,9 @@ export const MAP_DEFAULTS = {
   CENTER: [-70.6396642, 41.3899984], // Arlington, VA
   ZOOM: 11,
   BASEMAP: ESRI_BASEMAPS[5],
+  UI: {
+    components: ["zoom", "scale"],
+  }
 };
 
 const CLASS_BREAKS_SEATTLE = {
@@ -84,13 +89,78 @@ export const LAYER_IDS = {
   Population: "population"
 };
 
-export const LAYERS_CONFIG: LayersConfig = {
-  [LAYER_IDS.Population]: {
-    url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2",
-    id: LAYER_IDS.Population,
-    title: "Population",
-    type: ESRI_LAYER_TYPES.FeatureLayer,
-    renderer: (referenceScale: number) => dotDensity({
+export const populationPieChart = () => pieChart({
+  attributes: [
+    {
+      field: "B03002_003E",
+      color: "#f23c3f",
+      label: "White (non-Hispanic)"
+    },
+    {
+      field: "B03002_012E",
+      color: "#e8ca0d",
+      label: "Hispanic"
+    },
+    {
+      field: "B03002_004E",
+      color: "#00b6f1",
+      label: "Black or African American"
+    },
+    {
+      field: "B03002_006E",
+      color: "#32ef94",
+      label: "Asian"
+    },
+    {
+      field: "B03002_005E",
+      color: "#ff7fe9",
+      label: "American Indian/Alaskan Native"
+    },
+    {
+      field: "B03002_007E",
+      color: "#e2c4a5",
+      label: "Pacific Islander/Hawaiian Native"
+    },
+    {
+      field: "B03002_008E",
+      color: "#ff6a00",
+      label: "Other race"
+    },
+    {
+      field: "B03002_009E",
+      color: "#96f7ef",
+      label: "Two or more races"
+    }
+  ]
+},
+{
+  backgroundFillSymbol: { // polygon fill behind pie chart
+    color: [127, 127, 127, 0.5],
+    outline: {
+      width: 1,
+      color: [255, 255, 255, 1]
+    }
+  },
+  visualVariables: [
+    {
+      type: "size", // size visual variable based on population represented in each pie
+      valueExpression:
+        "Sum([$feature.B03002_003E,$feature.B03002_012E,$feature.B03002_004E,$feature.B03002_006E,$feature.B03002_005E,$feature.B03002_007E,$feature.B03002_008E,$feature.B03002_009E])",
+      stops: [
+        {
+          value: 0, // features where < 15% of the pop is in poverty
+          size: 20, // will be assigned a marker with this size in pts
+        },
+        {
+          value: 16000, // features where > 35% of the pop is in poverty
+          size: 80, // will be assigned a marker with this size in pts
+        }
+      ]
+      }
+  ]
+});
+
+export const populationDotDensity = (referenceScale: number) => dotDensity({
       referenceScale, 
       attributes: [
         {
@@ -135,13 +205,55 @@ export const LAYERS_CONFIG: LayersConfig = {
         }
       ],
       dotValue: 100
+    },{
+      dotSize: 3
     })
+
+export const LAYERS_CONFIG: LayersConfig = {
+  [LAYER_IDS.Population]: {
+    url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2",
+    id: LAYER_IDS.Population,
+    title: "Population | Dot Density or Pie Chart",
+    type: ESRI_LAYER_TYPES.FeatureLayer,
+    renderer: populationPieChart,
+    // popupEnabled: true,
+    popupTemplate:{
+      title: "Population",
+      expressionInfos: [
+        {
+          name: "sum",
+          title: "Sum",
+          expression: "Sum([$feature.B03002_003E,$feature.B03002_012E,$feature.B03002_004E,$feature.B03002_006E,$feature.B03002_005E,$feature.B03002_007E,$feature.B03002_008E,$feature.B03002_009E])"
+        },
+        {
+          name: "max",
+          title: "Max",
+          expression: "Max([$feature.B03002_003E,$feature.B03002_012E,$feature.B03002_004E,$feature.B03002_006E,$feature.B03002_005E,$feature.B03002_007E,$feature.B03002_008E,$feature.B03002_009E])"
+        },
+        {
+          name: "min",
+          title: "Min",
+          expression: "Min([$feature.B03002_003E,$feature.B03002_012E,$feature.B03002_004E,$feature.B03002_006E,$feature.B03002_005E,$feature.B03002_007E,$feature.B03002_008E,$feature.B03002_009E])"
+        }
+    ],
+      content: `<p>Sum: {expression/sum}</p>
+      <p>Max: {expression/max}</p>
+      <p>Min: {expression/min}</p>
+      <li>White (non-Hispanic): {B03002_003E}</li>
+      <li>Hispanic: {B03002_012E}</li>
+      <li>Black or African American: {B03002_004E}</li>
+      <li>Asian: {B03002_006E}</li>
+      <li>American Indian/Alaskan Native: {B03002_005E}</li>
+      <li>Pacific Islander/Hawaiian Native: {B03002_007E}</li>
+      <li>Other race: {B03002_008E}</li>
+      <li>Two or more races: {B03002_009E}</li>`
+    } 
   },
   [LAYER_IDS.Earthquakes]: {
     url: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.csv",
     id: LAYER_IDS.Earthquakes,
     type: ESRI_LAYER_TYPES.CVSLayer,
-    title: "Earthquakes",
+    title: "Earthquakes | Heatmap",
     renderer: () => heatmap({
       field: "mag",
       colorStops: [
@@ -164,19 +276,49 @@ export const LAYERS_CONFIG: LayersConfig = {
   },
   [LAYER_IDS.SeattleDemographics]: {
     url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Puget_Sound_BG_demographics/FeatureServer/0",
-    title: "Seattle Demographcs",
+    title: "Seattle Demographcs | Class Breaks",
     id: LAYER_IDS.SeattleDemographics,
     type: ESRI_LAYER_TYPES.FeatureLayer,
     renderer: () => ({
-      type: "simple",
-      symbol: {
+      type: "class-breaks",
+      field: "COL_DEG",
+      normalizationField: "EDUCBASECY",
+      defaultSymbol: {
         type: "simple-fill",
-        color: [255, 0, 255, 1],
+        color: "black",
+        style: "backward-diagonal",
         outline: {
-          color: [255, 255, 0],
-          width: 1, // points
-        },
+          width: 0.5,
+          color: [50, 50, 50, 0.6]
+        }
       },
+      defaultLabel: "no data",
+      classBreakInfos: [
+        {
+          minValue: 0,
+          maxValue: 0.3499,
+          symbol: CLASS_BREAKS_SEATTLE.Less35.symbol,
+          label: "< 35%" // label for symbol in legend
+        },
+        {
+          minValue: 0.35,
+          maxValue: 0.4999,
+          symbol: CLASS_BREAKS_SEATTLE.Less50.symbol,
+          label: "35 - 50%" // label for symbol in legend
+        },
+        {
+          minValue: 0.5,
+          maxValue: 0.7499,
+          symbol: CLASS_BREAKS_SEATTLE.More50.symbol,
+          label: "50 - 75%" // label for symbol in legend
+        },
+        {
+          minValue: 0.75,
+          maxValue: 1.0,
+          symbol: CLASS_BREAKS_SEATTLE.More75.symbol,
+          label: "> 75%" // label for symbol in legend
+        }
+      ]
     }),
   },
   [LAYER_IDS.MvConservationAreas]: {
@@ -184,6 +326,11 @@ export const LAYERS_CONFIG: LayersConfig = {
     title: "Conservation Areas",
     id: LAYER_IDS.MvConservationAreas,
     type: ESRI_LAYER_TYPES.FeatureLayer,
+    // popupEnabled: true,
+    popupTemplate: {
+      title: "Conservation Areas",
+      content: "<p>{tbl_info4_ICP_APPORGID}</p>"
+    }
   },
   [LAYER_IDS.MvTrails]: {
     url: "https://services1.arcgis.com/FNsEJ848HT5uDOHD/ArcGIS/rest/services/BPAC_Trails/FeatureServer/1",
@@ -261,11 +408,12 @@ export const LAYERS_CONFIG: LayersConfig = {
 };
 
 export const MAP_LAYERS: string[] = [
-  LAYER_IDS.Population,
-  // LAYER_IDS.SeattleDemographics,
+  LAYER_IDS.SeattleDemographics,
   // LAYER_IDS.CensusBlocks,
   LAYER_IDS.MvConservationAreas,
   LAYER_IDS.MvTrails,
   LAYER_IDS.MvBusStops,
+  LAYER_IDS.Population,
+
   // LAYER_IDS.Earthquakes
 ];

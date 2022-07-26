@@ -16,7 +16,7 @@ const App = (): JSX.Element => {
   const [viewType, setViewType] = useState<"2D" | "3D">("2D");
 
   useLayoutEffect(() => {
-    const { BASEMAP, CENTER, ZOOM } = MAP_DEFAULTS;
+    const { BASEMAP, CENTER, ZOOM, UI } = MAP_DEFAULTS;
 
     const map = new EsriMap({
       basemap: BASEMAP,
@@ -31,8 +31,11 @@ const App = (): JSX.Element => {
         container: "mapContainer",
         center: CENTER,
         zoom: ZOOM,
+        popup: {
+          autoOpenEnabled: false
+        },
         ui: {
-          components: ["zoom"],
+          ...UI
         },
       });
     } else {

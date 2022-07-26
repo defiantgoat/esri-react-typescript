@@ -3,7 +3,8 @@ import { render, fireEvent, act } from "@testing-library/react";
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import MapContext from "../components/MapContext";
-import Toolbar, { ESRI_BASEMAPS } from "../components/Toolbar";
+import Toolbar from "../components/Toolbar";
+import {ESRI_BASEMAPS} from "../config"
 
 jest.mock("@arcgis/core/core/uuid.js", () => ({
   generateUUID: () => "mock-esri-uuid",
@@ -17,6 +18,8 @@ const setMock = jest.fn();
 Map.mockImplementation(() => ({
   basemap: "dark-gray-vector",
   set: setMock,
+  add: (lyr) => this.allLayers.push(lyr),
+  allLayers: []
 }));
 
 MapView.mockImplementation(() => ({
