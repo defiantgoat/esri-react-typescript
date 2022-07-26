@@ -66,8 +66,8 @@ const useMapTools = () => {
         layer.sublayers = sublayers as any;
       }
 
-      if (popupEnabled && popupTemplate && !(layer instanceof MapImageLayer)) {
-        layer.popupEnabled = popupEnabled;
+      if (popupTemplate && !(layer instanceof MapImageLayer)) {
+        // layer.popupEnabled = popupEnabled;
         layer.popupTemplate = popupTemplate;
       }
 
