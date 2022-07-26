@@ -1,5 +1,6 @@
 {
   "setupFiles": [
+    "./src/tests/setupTests.js",
     "jest-canvas-mock"
   ],
   "transform": {

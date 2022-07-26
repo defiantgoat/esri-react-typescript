@@ -1,6 +1,6 @@
 import { simpleFill, simpleLine, cimSymbol, heatmap, uniqueValue, dotDensity } from "./renderers";
 
-type EsriLayer = "FeatureLayer"
+type EsriLayerType = "FeatureLayer"
 | "MapImageLayer"
 | "CVSLayer"
 | "GeoJSONLayer"
@@ -10,9 +10,9 @@ type EsriLayer = "FeatureLayer"
 
 export interface LayerConfig {
   url: string;
-  title: string;
   id: string;
-  type: EsriLayer;
+  type: EsriLayerType;
+  title?: string;
   renderer?: any;
   sublayers?: { id: number; renderer?: any }[];
   visible?: boolean;
@@ -20,7 +20,7 @@ export interface LayerConfig {
 
 type LayersConfig = Record<string, LayerConfig>;
 
-export const ESRI_LAYER_TYPES: Record<string, EsriLayer> =  {
+export const ESRI_LAYER_TYPES: Record<string, EsriLayerType> =  {
   FeatureLayer: "FeatureLayer",
   MapImageLayer: "MapImageLayer",
   CVSLayer: "CVSLayer",

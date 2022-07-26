@@ -5,6 +5,8 @@ import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import CSVLayer from "@arcgis/core/layers/CSVLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import { LayerConfig, ESRI_LAYER_TYPES } from "../config";
+import Renderer from "@arcgis/core/renderers/Renderer";
+import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 
 const useMapTools = () => {
   const mapViewContext = useContext(MapContext) as any;
@@ -20,7 +22,7 @@ const useMapTools = () => {
 
   const addLayer = (layerConfig: LayerConfig) => {
     const { url, title, type, id, renderer, sublayers } = layerConfig;
-    let layer = null as FeatureLayer | CSVLayer | MapImageLayer | null;
+    let layer = null as FeatureLayer | CSVLayer | MapImageLayer | GeoJSONLayer | null;
 
     switch (type) {
       case ESRI_LAYER_TYPES.FeatureLayer:
@@ -78,7 +80,7 @@ const useMapTools = () => {
     }
   };
 
-  const setRenderer = (id: string, renderer: any) => {
+  const setRenderer = (id: string, renderer: Renderer) => {
     const layer = findLayer(id) as FeatureLayer;
     if (layer) {
       layer.renderer = renderer;
