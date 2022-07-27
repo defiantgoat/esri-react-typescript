@@ -3,7 +3,7 @@ import useStyles from "./use-styles";
 import useMapTools from "../../hooks/useMapTools";
 import { MAP_LAYERS, LAYERS_CONFIG } from "../../config";
 import MapView from "@arcgis/core/views/MapView";
-import * as locator from "@arcgis/core/rest/locator"
+import * as locator from "@arcgis/core/rest/locator";
 import Graphic from "esri/Graphic";
 
 interface MapContainerProps {
@@ -43,19 +43,21 @@ const MapContainer: React.FC<MapContainerProps> = ({
 
     // });
     addEventHandlerToView("click", (event: any, view: MapView) => {
-      view.hitTest(event.screenPoint).then(({results}) => {
-        const features: any[] = results.filter(({type, layer}) => layer.type === "feature" && type === "graphic");
-        console.log(features)
-        const graphics = features.map(({graphic}) => graphic);
-        console.log(graphics)
-          view.popup.open({
+      view.hitTest(event.screenPoint).then(({ results }) => {
+        const features: any[] = results.filter(
+          ({ type, layer }) => layer.type === "feature" && type === "graphic"
+        );
+        console.log(features);
+        const graphics = features.map(({ graphic }) => graphic);
+        console.log(graphics);
+        view.popup.open({
           title: "Data",
           location: event.mapPoint,
-          features: graphics
+          features: graphics,
         });
-      })
+      });
     });
-  }, [addEventHandlerToView])
+  }, [addEventHandlerToView]);
 
   return (
     <div id="mapContainer" className={classes.map}>

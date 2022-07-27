@@ -32,10 +32,10 @@ const App = (): JSX.Element => {
         center: CENTER,
         zoom: ZOOM,
         popup: {
-          autoOpenEnabled: false
+          autoOpenEnabled: false,
         },
         ui: {
-          ...UI
+          components: []
         },
       });
     } else {
@@ -52,6 +52,9 @@ const App = (): JSX.Element => {
         },
       });
     }
+
+    UI.forEach(([widget, position]) => view.ui.add(widget(view), position));
+    
     setEsriMapView(view);
   }, [viewType]);
 

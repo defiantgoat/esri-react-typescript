@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext, useRef, useCallback } from "react";
 import MapContext from "../components/MapContext";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
@@ -8,72 +8,110 @@ import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import { LayerConfig, ESRI_LAYER_TYPES } from "../config";
 
 const useMapTools = () => {
+  console.log("usemaptools");
   const mapViewContext = useContext(MapContext) as any;
   const viewEventHandlers = useRef([]);
 
-  const getMapViewProperty = (property: string): any | null =>  mapViewContext?.get(property);
-  const getMapProperty = (property: string): any | null =>  mapViewContext?.map.get(property);
+  const getMapViewProperty = (property: string): any | null =>
+    mapViewContext?.get(property);
 
-  const addEventHandlerToView = (eventType: string, callback: any) => mapViewContext?.on(eventType, (event) => callback(event, mapViewContext));
+  const getMapProperty = (property: string): any | null =>
+    mapViewContext?.map.get(property);
 
-  const findLayer = (id: string): Layer | null =>
-    mapViewContext?.map.allLayers.find((layer: Layer) => layer.id === id);
+  const addEventHandlerToView = useCallback(
+    (eventType: string, callback: any) =>
+      mapViewContext?.on(eventType, (event) => callback(event, mapViewContext)),
+    [mapViewContext]
+  );
 
-  const setBasemap = (basemap: string): void => {
-    if (mapViewContext) {
-      mapViewContext.map.set("basemap", basemap);
-    }
-  };
+  const findLayer = useCallback(
+    (id: string): Layer | null =>
+      mapViewContext?.map.allLayers.find((layer: Layer) => layer.id === id),
+    [mapViewContext]
+  );
 
-  const addLayer = (layerConfig: LayerConfig) => {
-    const { url, title, type, id, renderer, sublayers, popupTemplate, popupEnabled } = layerConfig;
-    let layer = null as FeatureLayer | CSVLayer | MapImageLayer | GeoJSONLayer | null;
+  const setBasemap = useCallback(
+    (basemap: string): void => {
+      if (mapViewContext) {
+        mapViewContext.map.set("basemap", basemap);
+      }
+    },
+    [mapViewContext]
+  );
 
-    switch (type) {
-      case ESRI_LAYER_TYPES.FeatureLayer:
-        layer = new FeatureLayer({
-          url,
-          id,
-          title,
-        });
+  const addLayer = useCallback(
+    (layerConfig: LayerConfig) => {
+      const {
+        url,
+        title,
+        type,
+        id,
+        renderer,
+        sublayers,
+        popupTemplate,
+        popupEnabled,
+        labelingInfo
+      } = layerConfig;
+      let layer = null as
+        | FeatureLayer
+        | CSVLayer
+        | MapImageLayer
+        | GeoJSONLayer
+        | null;
 
-        break;
+      switch (type) {
+        case ESRI_LAYER_TYPES.FeatureLayer:
+          layer = new FeatureLayer({
+            url,
+            id,
+            title,
+          });
 
-      case ESRI_LAYER_TYPES.MapImageLayer:
-        layer = new MapImageLayer({
-          url,
-          id,
-          title,
-        });
+          break;
 
-        break;
+        case ESRI_LAYER_TYPES.MapImageLayer:
+          layer = new MapImageLayer({
+            url,
+            id,
+            title,
+          });
 
-      case ESRI_LAYER_TYPES.CVSLayer:
-        layer = new CSVLayer({ url, id, title });
-        break;
+          break;
 
-      default:
-        console.error("LayerConfig type property is missing or is an unknown type.")
-        break;
-    }
+        case ESRI_LAYER_TYPES.CVSLayer:
+          layer = new CSVLayer({ url, id, title });
+          break;
 
-    if (layer) {
-      if (renderer && !(layer instanceof MapImageLayer)) {
-        layer.renderer = renderer(mapViewContext?.scale);
+        default:
+          console.error(
+            "LayerConfig type property is missing or is an unknown type."
+          );
+          break;
       }
 
-      if (sublayers && layer instanceof MapImageLayer) {
-        layer.sublayers = sublayers as any;
-      }
+      if (layer) {
+        if (renderer && !(layer instanceof MapImageLayer)) {
+          layer.renderer = renderer(mapViewContext?.scale);
+        }
 
-      if (popupTemplate && !(layer instanceof MapImageLayer)) {
-        // layer.popupEnabled = popupEnabled;
-        layer.popupTemplate = popupTemplate;
-      }
+        if (sublayers && layer instanceof MapImageLayer) {
+          layer.sublayers = sublayers as any;
+        }
 
-      mapViewContext?.map.add(layer);
-    }
-  };
+        if (popupTemplate && !(layer instanceof MapImageLayer)) {
+          // layer.popupEnabled = popupEnabled;
+          layer.popupTemplate = popupTemplate;
+        }
+
+        if (labelingInfo && !(layer instanceof MapImageLayer)) {
+          layer.labelingInfo = labelingInfo;
+        }
+
+        mapViewContext?.map.add(layer);
+      }
+    },
+    [mapViewContext, findLayer]
+  );
 
   const removeLayer = (id: string) => {};
 
@@ -108,7 +146,7 @@ const useMapTools = () => {
     findLayer,
     setRenderer,
     getMapViewProperty,
-    getMapProperty
+    getMapProperty,
   };
 };
 

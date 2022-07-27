@@ -7,5 +7,5 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
 
 // Called by @arcgis/core/core/pbj.js
 global.TextDecoder = jest.fn().mockImplementation(() => ({
-  decode: jest.fn()
+  decode: jest.fn(),
 }));
