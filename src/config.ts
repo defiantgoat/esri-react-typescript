@@ -1,3 +1,17 @@
+import LayerList from "@arcgis/core/widgets/LayerList";
+import MapView from "@arcgis/core/views/MapView";
+import AreaMeasurement2D from "@arcgis/core/widgets/AreaMeasurement2D";
+import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
+import BasemapLayerList from "@arcgis/core/widgets/BasemapLayerList";
+import BasemapToggle from "@arcgis/core/widgets/BasemapToggle";
+import ElevationProfile from "@arcgis/core/widgets/ElevationProfile";
+import Expand from "@arcgis/core/widgets/Expand";
+import Fullscreen from "@arcgis/core/widgets/Fullscreen";
+import Home from "@arcgis/core/widgets/Home";
+import Legend from "@arcgis/core/widgets/Legend";
+import Print from "@arcgis/core/widgets/Print";
+import ScaleBar from "@arcgis/core/widgets/ScaleBar";
+
 import {
   simpleFill,
   simpleLine,
@@ -8,11 +22,6 @@ import {
   pieChart,
 } from "./renderers";
 
-import LayerList from "@arcgis/core/widgets/LayerList";
-import MapView from "@arcgis/core/views/MapView";
-import AreaMeasurement2D from "@arcgis/core/widgets/AreaMeasurement2D";
-import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
-
 type EsriLayerType =
   | "FeatureLayer"
   | "MapImageLayer"
@@ -20,7 +29,8 @@ type EsriLayerType =
   | "GeoJSONLayer"
   | "OGCFeatureLayer"
   | "StreamLayer"
-  | "WFSLayer";
+  | "WFSLayer"
+  | "PortalLayer"
 
 export interface LayerConfig {
   url: string;
@@ -32,7 +42,8 @@ export interface LayerConfig {
   visible?: boolean;
   popupTemplate?: any;
   popupEnabled?: boolean;
-  labelingInfo?: any[]
+  labelingInfo?: any[];
+  portalId?: string;
 }
 
 type LayersConfig = Record<string, LayerConfig>;
@@ -45,6 +56,7 @@ export const ESRI_LAYER_TYPES: Record<string, EsriLayerType> = {
   OGCFeatureLayer: "OGCFeatureLayer",
   StreamLayer: "StreamLayer",
   WFSLayer: "WFSLayer",
+  PortalLayer: "PortalLayer"
 };
 
 export const ESRI_BASEMAPS = [
@@ -69,8 +81,33 @@ export const MAP_DEFAULTS = {
   UI: [
     [() => "zoom", "top-right"],
     [(view) => new LayerList({view}), "bottom-right"],
-    [(view) => new AreaMeasurement2D({view}), "top-left"],
-    [(view) => new BasemapGallery({view}), "top-right"]
+    [(view) => new ScaleBar({view}), "bottom-left"],
+    // [(view) => new AreaMeasurement2D({view}), "top-left"],
+    // [(view) => new BasemapGallery({view}), "top-right"],
+    // [(view) => new BasemapLayerList({view}), "top-right"],
+    [(view) => new Fullscreen({view}), "top-right"],
+    [(view) => new Home({view}), "top-right"],
+    [(view) => new Print({
+      view,
+      printServiceUrl:
+      "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+    }), "top-right"],
+    [(view) => new BasemapToggle({view, nextBasemap: "hybrid"}), "top-left"],
+    [(view) => new Expand({
+      view,
+      content: new ElevationProfile({view}),
+      expandIconClass: "esri-icon-layer-list",
+    }), "top-left"],
+    [(view) => new Expand({
+      view,
+      content: new BasemapGallery({view}),
+      expandIconClass: "esri-icon-layer-list",
+    }), "top-left"],
+    [(view) => new Expand({
+      view,
+      content: new Legend({view}),
+      expandIconClass: "esri-icon-layer-list",
+    }), "top-left"],
   ] as Array<[(view: MapView | undefined) => string | any, string]>
 };
 
@@ -106,6 +143,8 @@ export const LAYER_IDS = {
   MvBusStops: "mv_pois",
   Earthquakes: "earthquakes",
   Population: "population",
+  TrailHeadPois: "trail_head_pois",
+  CensusRedist: "census_redist"
 };
 
 export const populationPieChart = () =>
@@ -237,6 +276,18 @@ export const populationDotDensity = (referenceScale: number) =>
   );
 
 export const LAYERS_CONFIG: LayersConfig = {
+  [LAYER_IDS.CensusRedist]: {
+    url: "https://www.arcgis.com",
+    id: LAYER_IDS.CensusRedist,
+    type: ESRI_LAYER_TYPES.PortalLayer,
+    portalId: "b3642e91b49548f5af772394b0537681"
+  },
+  [LAYER_IDS.TrailHeadPois]: {
+    url: "https://blueraster.maps.arcgis.com",
+    id: LAYER_IDS.TrailHeadPois,
+    type: ESRI_LAYER_TYPES.PortalLayer,
+    portalId: "59494cc97fa547fcb16e7ffcfc083f99"
+  },
   [LAYER_IDS.Population]: {
     url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2",
     id: LAYER_IDS.Population,
@@ -571,11 +622,13 @@ export const LAYERS_CONFIG: LayersConfig = {
 
 export const MAP_LAYERS: string[] = [
   // LAYER_IDS.SeattleDemographics,
-  LAYER_IDS.CensusBlocks,
+  // LAYER_IDS.CensusBlocks,
   LAYER_IDS.MvConservationAreas,
   // LAYER_IDS.MvTrails,
   LAYER_IDS.MvBusStops,
   // LAYER_IDS.Population,
   LAYER_IDS.MvTrailsArrows,
+  LAYER_IDS.TrailHeadPois,
+  LAYER_IDS.CensusRedist
   // LAYER_IDS.Earthquakes
 ];

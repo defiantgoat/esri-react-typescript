@@ -17,10 +17,10 @@ const App = (): JSX.Element => {
 
   useLayoutEffect(() => {
     const { BASEMAP, CENTER, ZOOM, UI } = MAP_DEFAULTS;
-
+    
     const map = new EsriMap({
       basemap: BASEMAP,
-      ground: viewType !== "2D" ? "world-elevation" : undefined, //Elevation service
+      ground: "world-elevation"
     });
 
     let view = null as any;
@@ -39,13 +39,14 @@ const App = (): JSX.Element => {
         },
       });
     } else {
+      const [x, y] = CENTER;
       view = new EsriSceneView({
         map,
         container: "mapContainer",
         camera: {
           position: {
-            x: CENTER[0],
-            y: CENTER[1],
+            x,
+            y,
             z: 2000,
           },
           tilt: 74,

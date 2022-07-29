@@ -5,6 +5,7 @@ import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import CSVLayer from "@arcgis/core/layers/CSVLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
+import Portal from "@arcgis/core/portal/Portal";
 import { LayerConfig, ESRI_LAYER_TYPES } from "../config";
 
 const useMapTools = () => {
@@ -40,7 +41,7 @@ const useMapTools = () => {
   );
 
   const addLayer = useCallback(
-    (layerConfig: LayerConfig) => {
+    async (layerConfig: LayerConfig) => {
       const {
         url,
         title,
@@ -50,7 +51,8 @@ const useMapTools = () => {
         sublayers,
         popupTemplate,
         popupEnabled,
-        labelingInfo
+        labelingInfo,
+        portalId
       } = layerConfig;
       let layer = null as
         | FeatureLayer
@@ -60,6 +62,17 @@ const useMapTools = () => {
         | null;
 
       switch (type) {
+        case ESRI_LAYER_TYPES.PortalLayer:
+          layer = await Layer.fromPortalItem({
+            //@ts-ignore
+            portalItem: {
+              id: portalId as string,
+              portal: new Portal({
+                url
+              })
+            }
+          }) as FeatureLayer;
+          break;
         case ESRI_LAYER_TYPES.FeatureLayer:
           layer = new FeatureLayer({
             url,
