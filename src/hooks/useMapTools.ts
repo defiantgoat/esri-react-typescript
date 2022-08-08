@@ -1,4 +1,4 @@
-import { useContext, useRef, useCallback } from "react";
+import { useContext, useCallback } from "react";
 import MapContext from "../components/MapContext";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
@@ -9,9 +9,7 @@ import Portal from "@arcgis/core/portal/Portal";
 import { LayerConfig, ESRI_LAYER_TYPES } from "../config";
 
 const useMapTools = () => {
-  console.log("usemaptools");
-  const mapViewContext = useContext(MapContext) as any;
-  const viewEventHandlers = useRef([]);
+  const mapViewContext = useContext(MapContext) as any; 
 
   const getMapViewProperty = (property: string): any | null =>
     mapViewContext?.get(property);
@@ -19,11 +17,15 @@ const useMapTools = () => {
   const getMapProperty = (property: string): any | null =>
     mapViewContext?.map.get(property);
 
-  const addEventHandlerToView = useCallback(
-    (eventType: string, callback: any) =>
-      mapViewContext?.on(eventType, (event) => callback(event, mapViewContext)),
-    [mapViewContext]
-  );
+  const addEventHandlerToView = (eventType: string, callback: any) => {
+      const handler = mapViewContext?.on(eventType, (event) => callback(event, mapViewContext));
+      return handler;
+    };
+  
+  const addWatchHandlerToView = (watchPath: string, callback: any) => {
+    const handler = mapViewContext?.watch(watchPath, (newValue, oldValue, propertyName, target) => callback(newValue, oldValue, propertyName, target, mapViewContext));
+    return handler;
+  }
 
   const findLayer = useCallback(
     (id: string): Layer | null =>
@@ -52,7 +54,9 @@ const useMapTools = () => {
         popupTemplate,
         popupEnabled,
         labelingInfo,
-        portalId
+        portalId,
+        fields,
+        outFields
       } = layerConfig;
       let layer = null as
         | FeatureLayer
@@ -74,10 +78,13 @@ const useMapTools = () => {
           }) as FeatureLayer;
           break;
         case ESRI_LAYER_TYPES.FeatureLayer:
+          console.log(fields)
           layer = new FeatureLayer({
             url,
             id,
             title,
+            fields,
+            outFields
           });
 
           break;
@@ -92,7 +99,7 @@ const useMapTools = () => {
           break;
 
         case ESRI_LAYER_TYPES.CVSLayer:
-          layer = new CSVLayer({ url, id, title });
+          layer = new CSVLayer({ url, id, title, fields });
           break;
 
         default:
@@ -149,6 +156,33 @@ const useMapTools = () => {
     }
   };
 
+  const queryLayerFeatures = async (id: string, queryParams: any) => {
+    const layer = findLayer(id) as FeatureLayer;
+    if (!layer) {
+      return null;
+    }
+
+    const featureSet = await layer.queryFeatures(queryParams);
+    return featureSet;
+  };
+
+  const queryLayerViewFeatures = async (id: string, queryParams: any) => {
+    const layer = findLayer(id) as FeatureLayer;
+    if (!layer || !mapViewContext) {
+      return null;
+    }
+
+    try {
+      const layerView = await mapViewContext.whenLayerView(layer);
+      const featureSet = await layerView.queryFeatures(queryParams);
+      return featureSet;
+    } catch (e) {
+      console.log(e)
+      return null;
+    }
+    
+  };
+
   return {
     addEventHandlerToView,
     setBasemap,
@@ -160,6 +194,9 @@ const useMapTools = () => {
     setRenderer,
     getMapViewProperty,
     getMapProperty,
+    addWatchHandlerToView,
+    queryLayerFeatures,
+    queryLayerViewFeatures
   };
 };
 

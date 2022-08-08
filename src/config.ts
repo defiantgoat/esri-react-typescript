@@ -44,6 +44,8 @@ export interface LayerConfig {
   popupEnabled?: boolean;
   labelingInfo?: any[];
   portalId?: string;
+  fields?: any[];
+  outFields?: string[];
 }
 
 type LayersConfig = Record<string, LayerConfig>;
@@ -80,19 +82,23 @@ export const MAP_DEFAULTS = {
   BASEMAP: ESRI_BASEMAPS[5],
   UI: [
     [() => "zoom", "top-right"],
-    [(view) => new LayerList({view}), "bottom-right"],
+    [(view) => new Expand({
+      view,
+      content: new LayerList({view}),
+      expandIconClass: "esri-icon-layer-list",
+     }), "bottom-right"],
     [(view) => new ScaleBar({view}), "bottom-left"],
     // [(view) => new AreaMeasurement2D({view}), "top-left"],
     // [(view) => new BasemapGallery({view}), "top-right"],
     // [(view) => new BasemapLayerList({view}), "top-right"],
     [(view) => new Fullscreen({view}), "top-right"],
     [(view) => new Home({view}), "top-right"],
-    [(view) => new Print({
-      view,
-      printServiceUrl:
-      "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
-    }), "top-right"],
-    [(view) => new BasemapToggle({view, nextBasemap: "hybrid"}), "top-left"],
+    // [(view) => new Print({
+    //   view,
+    //   printServiceUrl:
+    //   "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+    // }), "top-right"],
+    // [(view) => new BasemapToggle({view, nextBasemap: "hybrid"}), "top-left"],
     [(view) => new Expand({
       view,
       content: new ElevationProfile({view}),
@@ -295,6 +301,7 @@ export const LAYERS_CONFIG: LayersConfig = {
     type: ESRI_LAYER_TYPES.FeatureLayer,
     renderer: populationPieChart,
     // popupEnabled: true,
+    outFields: ["*"],
     popupTemplate: {
       title: "ExpressionContent",
       expressionInfos: [
@@ -626,7 +633,7 @@ export const MAP_LAYERS: string[] = [
   LAYER_IDS.MvConservationAreas,
   // LAYER_IDS.MvTrails,
   LAYER_IDS.MvBusStops,
-  // LAYER_IDS.Population,
+  LAYER_IDS.Population,
   LAYER_IDS.MvTrailsArrows,
   LAYER_IDS.TrailHeadPois,
   LAYER_IDS.CensusRedist

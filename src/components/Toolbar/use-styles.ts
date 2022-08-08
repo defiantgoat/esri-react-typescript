@@ -22,6 +22,7 @@ const useStyles = createUseStyles({
     display: "flex",
     flexDirection: "column",
     gap: "8px",
+    overflow: "scroll",
     "& button": {
       borderRadius: "5px",
       border: "none",
