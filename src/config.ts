@@ -31,6 +31,7 @@ type EsriLayerType =
   | "StreamLayer"
   | "WFSLayer"
   | "PortalLayer"
+  | "ImageryLayer";
 
 export interface LayerConfig {
   url: string;
@@ -46,6 +47,7 @@ export interface LayerConfig {
   portalId?: string;
   fields?: any[];
   outFields?: string[];
+  pixelFilter?: any;
 }
 
 type LayersConfig = Record<string, LayerConfig>;
@@ -58,7 +60,8 @@ export const ESRI_LAYER_TYPES: Record<string, EsriLayerType> = {
   OGCFeatureLayer: "OGCFeatureLayer",
   StreamLayer: "StreamLayer",
   WFSLayer: "WFSLayer",
-  PortalLayer: "PortalLayer"
+  PortalLayer: "PortalLayer",
+  ImageryLayer: "ImageryLayer",
 };
 
 export const ESRI_BASEMAPS = [
@@ -82,39 +85,55 @@ export const MAP_DEFAULTS = {
   BASEMAP: ESRI_BASEMAPS[5],
   UI: [
     [() => "zoom", "top-right"],
-    [(view) => new Expand({
-      view,
-      content: new LayerList({view}),
-      expandIconClass: "esri-icon-layer-list",
-     }), "bottom-right"],
-    [(view) => new ScaleBar({view}), "bottom-left"],
+    [
+      (view) =>
+        new Expand({
+          view,
+          content: new LayerList({ view }),
+          expandIconClass: "esri-icon-layer-list",
+        }),
+      "bottom-right",
+    ],
+    [(view) => new ScaleBar({ view }), "bottom-left"],
     // [(view) => new AreaMeasurement2D({view}), "top-left"],
     // [(view) => new BasemapGallery({view}), "top-right"],
     // [(view) => new BasemapLayerList({view}), "top-right"],
-    [(view) => new Fullscreen({view}), "top-right"],
-    [(view) => new Home({view}), "top-right"],
+    [(view) => new Fullscreen({ view }), "top-right"],
+    [(view) => new Home({ view }), "top-right"],
     // [(view) => new Print({
     //   view,
     //   printServiceUrl:
     //   "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
     // }), "top-right"],
     // [(view) => new BasemapToggle({view, nextBasemap: "hybrid"}), "top-left"],
-    [(view) => new Expand({
-      view,
-      content: new ElevationProfile({view}),
-      expandIconClass: "esri-icon-layer-list",
-    }), "top-left"],
-    [(view) => new Expand({
-      view,
-      content: new BasemapGallery({view}),
-      expandIconClass: "esri-icon-layer-list",
-    }), "top-left"],
-    [(view) => new Expand({
-      view,
-      content: new Legend({view}),
-      expandIconClass: "esri-icon-layer-list",
-    }), "top-left"],
-  ] as Array<[(view: MapView | undefined) => string | any, string]>
+    [
+      (view) =>
+        new Expand({
+          view,
+          content: new ElevationProfile({ view }),
+          expandIconClass: "esri-icon-layer-list",
+        }),
+      "top-left",
+    ],
+    [
+      (view) =>
+        new Expand({
+          view,
+          content: new BasemapGallery({ view }),
+          expandIconClass: "esri-icon-layer-list",
+        }),
+      "top-left",
+    ],
+    [
+      (view) =>
+        new Expand({
+          view,
+          content: new Legend({ view }),
+          expandIconClass: "esri-icon-layer-list",
+        }),
+      "top-left",
+    ],
+  ] as Array<[(view: MapView | undefined) => string | any, string]>,
 };
 
 const CLASS_BREAKS_SEATTLE = {
@@ -150,7 +169,9 @@ export const LAYER_IDS = {
   Earthquakes: "earthquakes",
   Population: "population",
   TrailHeadPois: "trail_head_pois",
-  CensusRedist: "census_redist"
+  CensusRedist: "census_redist",
+  NLCDLandCover2001: "land_cover_2001",
+  CharlotteLAS: "charlotte_las",
 };
 
 export const populationPieChart = () =>
@@ -282,17 +303,101 @@ export const populationDotDensity = (referenceScale: number) =>
   );
 
 export const LAYERS_CONFIG: LayersConfig = {
+  [LAYER_IDS.CharlotteLAS]: {
+    url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/CharlotteLAS/ImageServer",
+    type: ESRI_LAYER_TYPES.ImageryLayer,
+    id: LAYER_IDS.CharlotteLAS,
+    pixelFilter: (pixelData) => {
+      if (
+        pixelData === null ||
+        pixelData.pixelBlock === null ||
+        pixelData.pixelBlock.pixels === null
+      ) {
+        return;
+      }
+      // The pixelBlock stores the values of all pixels visible in the view
+      let pixelBlock = pixelData.pixelBlock;
+
+      // Get the min and max values of the data in the current view
+      let minValue = pixelBlock.statistics[0].minValue;
+      let maxValue = pixelBlock.statistics[0].maxValue;
+
+      // The mask is an array that determines which pixels are visible to the client
+      let mask = pixelBlock.mask;
+
+      // The pixels visible in the view
+      let pixels = pixelBlock.pixels;
+
+      // The number of pixels in the pixelBlock
+      let numPixels = pixelBlock.width * pixelBlock.height;
+
+      // Calculate the factor by which to determine the red and blue
+      // values in the colorized version of the layer
+      let factor = 255.0 / (maxValue - minValue);
+
+      let band1 = pixels[0];
+
+      // Create empty arrays for each of the RGB bands to set on the pixelBlock
+      let rBand = [] as any[];
+      let gBand = [] as any[];
+      let bBand = [] as any[];
+
+      // Loop through all the pixels in the view
+      for (let i = 0; i < numPixels; i++) {
+        // Get the pixel value recorded at the pixel location
+        let tempValue = band1[i];
+        // Calculate the red value based on the factor
+        let red = (tempValue - minValue) * factor;
+
+        // Sets a color between blue (lowest) and red (highest) in each band
+        rBand[i] = red;
+        gBand[i] = 0;
+        bBand[i] = 255 - red;
+      }
+
+      // Set the new pixel values on the pixelBlock (now three bands)
+      pixelData.pixelBlock.pixels = [rBand, gBand, bBand];
+      pixelData.pixelBlock.pixelType = "u8"; // u8 is used for color
+    },
+  },
+  [LAYER_IDS.NLCDLandCover2001]: {
+    url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/NLCDLandCover2001/ImageServer",
+    type: ESRI_LAYER_TYPES.ImageryLayer,
+    id: LAYER_IDS.NLCDLandCover2001,
+    renderer: () => ({
+      type: "unique-value", // autocasts as new UniqueValueRenderer()
+      field: "ClassName",
+      // defaultSymbol: { type: "simple-fill", color: "orange" },  // autocasts as new SimpleFillSymbol()
+      uniqueValueInfos: [
+        {
+          // All features with value of "North" will be blue
+          value: "Open Water",
+          symbol: {
+            type: "simple-fill", // autocasts as new SimpleFillSymbol()
+            color: "blue",
+          },
+        },
+        {
+          value: "Developed, Medium Intensity",
+          symbol: {
+            type: "simple-fill",
+            color: "yellow",
+          },
+        },
+      ],
+    }),
+  },
   [LAYER_IDS.CensusRedist]: {
     url: "https://www.arcgis.com",
     id: LAYER_IDS.CensusRedist,
     type: ESRI_LAYER_TYPES.PortalLayer,
-    portalId: "b3642e91b49548f5af772394b0537681"
+    portalId: "b3642e91b49548f5af772394b0537681",
   },
   [LAYER_IDS.TrailHeadPois]: {
     url: "https://blueraster.maps.arcgis.com",
     id: LAYER_IDS.TrailHeadPois,
     type: ESRI_LAYER_TYPES.PortalLayer,
-    portalId: "59494cc97fa547fcb16e7ffcfc083f99"
+    portalId: "59494cc97fa547fcb16e7ffcfc083f99",
   },
   [LAYER_IDS.Population]: {
     url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2",
@@ -429,19 +534,17 @@ export const LAYERS_CONFIG: LayersConfig = {
     //       },
     //     }
     //   }),
-      renderer: () =>
-      ({
-        type: "simple",
-        symbol: {
-          type: "simple-fill",
-          style: "diagonal-cross",
+    renderer: () => ({
+      type: "simple",
+      symbol: {
+        type: "simple-fill",
+        style: "diagonal-cross",
+        color: [25, 100, 25, 0.4],
+        outline: {
           color: [25, 100, 25, 0.4],
-          outline: {
-            color: [25, 100, 25, 0.4],
-
-          },
-        }
-      }),
+        },
+      },
+    }),
     // popupEnabled: true,
     popupTemplate: {
       title: "Custom Popup",
@@ -487,10 +590,10 @@ export const LAYERS_CONFIG: LayersConfig = {
         marker: {
           style: "arrow",
           color: "white",
-          placement: "end"
-        }
-      }
-    })
+          placement: "end",
+        },
+      },
+    }),
   },
   [LAYER_IDS.MvTrails]: {
     url: "https://services1.arcgis.com/FNsEJ848HT5uDOHD/ArcGIS/rest/services/BPAC_Trails/FeatureServer/1",
@@ -567,12 +670,14 @@ export const LAYERS_CONFIG: LayersConfig = {
             type: "simple-marker",
             style: "square",
             color: "orange",
-            size: "8px",  // pixels
-            outline: {  // autocasts as new SimpleLineSymbol()
-              color: [ 255, 255, 0 ],
-              width: 1  // points
-            }
-        }}),
+            size: "8px", // pixels
+            outline: {
+              // autocasts as new SimpleLineSymbol()
+              color: [255, 255, 0],
+              width: 1, // points
+            },
+          },
+        }),
       },
     ],
   },
@@ -607,8 +712,9 @@ export const LAYERS_CONFIG: LayersConfig = {
       symbol: {
         type: "web-style",
         name: "bus-station",
-        styleName: "Esri2DPointSymbolsStyle"
-    }}),
+        styleName: "Esri2DPointSymbolsStyle",
+      },
+    }),
     labelingInfo: [
       {
         minScale: 10000,
@@ -616,26 +722,33 @@ export const LAYERS_CONFIG: LayersConfig = {
         symbol: {
           type: "text",
           color: "gold",
-          font: { family: 'Orbitron', style: 'normal', weight: 'bold', size: 12 }
+          font: {
+            family: "Orbitron",
+            style: "normal",
+            weight: "bold",
+            size: 12,
+          },
         },
         labelPlacement: "above-center",
         labelExpressionInfo: {
-          expression: "$feature.NAME"
-        }
-      }
-    ]
+          expression: "$feature.NAME",
+        },
+      },
+    ],
   },
 };
 
 export const MAP_LAYERS: string[] = [
   // LAYER_IDS.SeattleDemographics,
   // LAYER_IDS.CensusBlocks,
+  // LAYER_IDS.NLCDLandCover2001,
+  LAYER_IDS.CharlotteLAS,
   LAYER_IDS.MvConservationAreas,
   // LAYER_IDS.MvTrails,
   LAYER_IDS.MvBusStops,
-  LAYER_IDS.Population,
+  // LAYER_IDS.Population,
   LAYER_IDS.MvTrailsArrows,
-  LAYER_IDS.TrailHeadPois,
-  LAYER_IDS.CensusRedist
+  // LAYER_IDS.TrailHeadPois,
+  // LAYER_IDS.CensusRedist
   // LAYER_IDS.Earthquakes
 ];

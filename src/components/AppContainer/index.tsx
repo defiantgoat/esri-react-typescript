@@ -7,17 +7,16 @@ import { MAP_DEFAULTS } from "../../config";
 // import { ESRI_API_KEY } from "../../keys";
 import App from "../App";
 
-
 const AppContainer = (): JSX.Element => {
   const [esriMapView, setEsriMapView] = useState(null as any);
   const [viewType, setViewType] = useState<"2D" | "3D">("2D");
 
   useLayoutEffect(() => {
     const { BASEMAP, CENTER, ZOOM, UI } = MAP_DEFAULTS;
-    
+
     const map = new EsriMap({
       basemap: BASEMAP,
-      ground: "world-elevation"
+      ground: "world-elevation",
     });
 
     let view = null as any;
@@ -32,7 +31,7 @@ const AppContainer = (): JSX.Element => {
           autoOpenEnabled: false,
         },
         ui: {
-          components: []
+          components: [],
         },
       });
     } else {
@@ -52,7 +51,7 @@ const AppContainer = (): JSX.Element => {
     }
 
     UI.forEach(([widget, position]) => view.ui.add(widget(view), position));
-    
+
     setEsriMapView(view);
   }, [viewType]);
 

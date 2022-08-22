@@ -7,9 +7,13 @@ import Layer from "@arcgis/core/layers/Layer";
 import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import Portal from "@arcgis/core/portal/Portal";
 import { LayerConfig, ESRI_LAYER_TYPES } from "../config";
+import MapView from "esri/views/MapView";
+import ImageryLayer from "@arcgis/core/layers/ImageryLayer";
 
 const useMapTools = () => {
-  const mapViewContext = useContext(MapContext) as any; 
+  const mapViewContext = useContext(MapContext) as any;
+
+  const getMapView = (): MapView | null => mapViewContext || null;
 
   const getMapViewProperty = (property: string): any | null =>
     mapViewContext?.get(property);
@@ -18,20 +22,23 @@ const useMapTools = () => {
     mapViewContext?.map.get(property);
 
   const addEventHandlerToView = (eventType: string, callback: any) => {
-      const handler = mapViewContext?.on(eventType, (event) => callback(event, mapViewContext));
-      return handler;
-    };
-  
-  const addWatchHandlerToView = (watchPath: string, callback: any) => {
-    const handler = mapViewContext?.watch(watchPath, (newValue, oldValue, propertyName, target) => callback(newValue, oldValue, propertyName, target, mapViewContext));
+    const handler = mapViewContext?.on(eventType, (event) =>
+      callback(event, mapViewContext)
+    );
     return handler;
-  }
+  };
 
-  const findLayer = useCallback(
-    (id: string): Layer | null =>
-      mapViewContext?.map.allLayers.find((layer: Layer) => layer.id === id),
-    [mapViewContext]
-  );
+  const addWatchHandlerToView = (watchPath: string, callback: any) => {
+    const handler = mapViewContext?.watch(
+      watchPath,
+      (newValue, oldValue, propertyName, target) =>
+        callback(newValue, oldValue, propertyName, target, mapViewContext)
+    );
+    return handler;
+  };
+
+  const findLayer = (id: string): Layer | null =>
+    mapViewContext?.map.allLayers.find((layer: Layer) => layer.id === id);
 
   const setBasemap = useCallback(
     (basemap: string): void => {
@@ -42,96 +49,122 @@ const useMapTools = () => {
     [mapViewContext]
   );
 
-  const addLayer = useCallback(
-    async (layerConfig: LayerConfig) => {
-      const {
-        url,
-        title,
-        type,
-        id,
-        renderer,
-        sublayers,
-        popupTemplate,
-        popupEnabled,
-        labelingInfo,
-        portalId,
-        fields,
-        outFields
-      } = layerConfig;
-      let layer = null as
-        | FeatureLayer
-        | CSVLayer
-        | MapImageLayer
-        | GeoJSONLayer
-        | null;
+  const reorderLayer = (id: string, index: number) => {
+    const layer = findLayer(id);
+    console.log(
+      id,
+      layer,
+      mapViewContext.map.allLayers
+        .toArray()
+        .forEach(({ id }) => console.log(id))
+    );
+    if (layer && mapViewContext) {
+      const lyr = mapViewContext.map.reorder(layer, index);
+      console.log(lyr);
+    }
+  };
 
-      switch (type) {
-        case ESRI_LAYER_TYPES.PortalLayer:
-          layer = await Layer.fromPortalItem({
-            //@ts-ignore
-            portalItem: {
-              id: portalId as string,
-              portal: new Portal({
-                url
-              })
-            }
-          }) as FeatureLayer;
-          break;
-        case ESRI_LAYER_TYPES.FeatureLayer:
-          console.log(fields)
-          layer = new FeatureLayer({
-            url,
-            id,
-            title,
-            fields,
-            outFields
-          });
+  const addLayer = async (layerConfig: LayerConfig) => {
+    const {
+      url,
+      title,
+      type,
+      id,
+      renderer,
+      sublayers,
+      popupTemplate,
+      popupEnabled,
+      labelingInfo,
+      portalId,
+      fields,
+      outFields,
+      pixelFilter,
+    } = layerConfig;
+    let layer = null as
+      | FeatureLayer
+      | CSVLayer
+      | MapImageLayer
+      | GeoJSONLayer
+      | ImageryLayer
+      | null;
 
-          break;
+    switch (type) {
+      case ESRI_LAYER_TYPES.PortalLayer:
+        layer = (await Layer.fromPortalItem({
+          //@ts-ignore
+          portalItem: {
+            id: portalId as string,
+            portal: new Portal({
+              url,
+            }),
+          },
+        })) as FeatureLayer;
+        break;
 
-        case ESRI_LAYER_TYPES.MapImageLayer:
-          layer = new MapImageLayer({
-            url,
-            id,
-            title,
-          });
+      case ESRI_LAYER_TYPES.FeatureLayer:
+        console.log(id);
+        layer = new FeatureLayer({
+          url,
+          id,
+          title,
+          fields,
+          outFields,
+        });
 
-          break;
+        break;
 
-        case ESRI_LAYER_TYPES.CVSLayer:
-          layer = new CSVLayer({ url, id, title, fields });
-          break;
+      case ESRI_LAYER_TYPES.MapImageLayer:
+        layer = new MapImageLayer({
+          url,
+          id,
+          title,
+        });
 
-        default:
-          console.error(
-            "LayerConfig type property is missing or is an unknown type."
-          );
-          break;
+        break;
+
+      case ESRI_LAYER_TYPES.CVSLayer:
+        layer = new CSVLayer({ url, id, title, fields });
+        break;
+
+      case ESRI_LAYER_TYPES.ImageryLayer:
+        layer = new ImageryLayer({ url, id });
+        break;
+
+      default:
+        console.error(
+          "LayerConfig type property is missing or is an unknown type."
+        );
+        break;
+    }
+
+    if (layer) {
+      if (renderer && !(layer instanceof MapImageLayer)) {
+        layer.renderer = renderer(mapViewContext?.scale);
       }
 
-      if (layer) {
-        if (renderer && !(layer instanceof MapImageLayer)) {
-          layer.renderer = renderer(mapViewContext?.scale);
-        }
-
-        if (sublayers && layer instanceof MapImageLayer) {
-          layer.sublayers = sublayers as any;
-        }
-
-        if (popupTemplate && !(layer instanceof MapImageLayer)) {
-          // layer.popupEnabled = popupEnabled;
-          layer.popupTemplate = popupTemplate;
-        }
-
-        if (labelingInfo && !(layer instanceof MapImageLayer)) {
-          layer.labelingInfo = labelingInfo;
-        }
-
-        mapViewContext?.map.add(layer);
+      if (sublayers && layer instanceof MapImageLayer) {
+        layer.sublayers = sublayers as any;
       }
-    },
-    [mapViewContext, findLayer]
-  );
+
+      if (popupTemplate && !(layer instanceof MapImageLayer)) {
+        // layer.popupEnabled = popupEnabled;
+        layer.popupTemplate = popupTemplate;
+      }
+
+      if (
+        labelingInfo &&
+        !(layer instanceof MapImageLayer || layer instanceof ImageryLayer)
+      ) {
+        layer.labelingInfo = labelingInfo;
+      }
+
+      if (pixelFilter && layer instanceof ImageryLayer) {
+        layer.pixelFilter = pixelFilter;
+      }
+
+      mapViewContext?.map.add(layer);
+    }
+  };
 
   const removeLayer = (id: string) => {};
 
@@ -177,10 +210,9 @@ const useMapTools = () => {
       const featureSet = await layerView.queryFeatures(queryParams);
       return featureSet;
     } catch (e) {
-      console.log(e)
+      console.log(e);
       return null;
     }
-    
   };
 
   return {
@@ -196,7 +228,9 @@ const useMapTools = () => {
     getMapProperty,
     addWatchHandlerToView,
     queryLayerFeatures,
-    queryLayerViewFeatures
+    queryLayerViewFeatures,
+    getMapView,
+    reorderLayer,
   };
 };
 
