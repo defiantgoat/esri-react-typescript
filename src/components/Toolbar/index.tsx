@@ -1,12 +1,21 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import useStyles from "./use-styles";
 import useMapTools from "../../hooks/useMapTools";
 import { ESRI_BASEMAPS, LAYER_IDS, populationDotDensity } from "../../config";
 import { simpleLine } from "../../renderers";
 import MapView from "@arcgis/core/views/MapView";
+import AuthContext from "../AuthContext";
+import Portal from "@arcgis/core/portal/Portal";
 
 const Toolbar = (): JSX.Element => {
   const classes = useStyles();
+  const identityManager = useContext(AuthContext);
   const {
     reorderLayer,
     getMapView,
@@ -21,6 +30,17 @@ const Toolbar = (): JSX.Element => {
   } = useMapTools();
   const viewHandlers = useRef({} as any);
   const [busy, setBusy] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [portalItems, setPortalItems] = useState([] as any[]);
+
+  const handleLogin = () => {
+    identityManager?.getCredential("https://www.arcgis.com");
+  };
+
+  const handleLogout = () => {
+    identityManager?.destroyCredentials();
+    setLoggedIn(false);
+  };
 
   const dottedLine = useCallback(
     () =>
@@ -97,9 +117,44 @@ const Toolbar = (): JSX.Element => {
     };
   }, [addEventHandlerToView, addWatchHandlerToView]);
 
+  useEffect(() => {
+    if (identityManager) {
+      identityManager
+        .checkSignInStatus("https://www.arcgis.com")
+        .then(() => {
+          setLoggedIn(true);
+        })
+        .catch((e) => {
+          setLoggedIn(false);
+          console.log(e);
+        });
+    }
+  }, [identityManager]);
+
+  useEffect(() => {
+    if (loggedIn && identityManager) {
+      const portal = new Portal(
+       { url: "https://www.arcgis.com"}
+      );
+      // portal.authMode = "immediate";
+      portal.load().then(() => {
+        let queryParams = {
+          query: "owner:" + portal.user.username,
+          sortField: "numViews",
+          sortOrder: "desc",
+          num: 20
+        } as any;
+        // Query the items based on the queryParams created from portal above
+        portal.queryItems(queryParams).then((items) => setPortalItems(items.results) );
+      })
+      
+    }
+  }, [loggedIn, identityManager])
+
   return (
     <div className={classes.sidebar}>
       <div className={classes.title}>JS Study</div>
+
       <div className={classes.basemapButtons}>
         {/* {ESRI_BASEMAPS.map((basemap) => (
           <button
@@ -184,6 +239,26 @@ const Toolbar = (): JSX.Element => {
         >
           Query Layer By Map Center (Spatial)
         </button>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            borderTop: "1px solid darkcyan",
+            marginTop: "1rem",
+            paddingTop: "1rem",
+          }}
+        >
+          {loggedIn ? (
+            <button onClick={handleLogout}>Logout</button>
+          ) : (
+            <button onClick={handleLogin}>Login</button>
+          )}
+        </div>
+        <div style={{display: "flex", gap: "3px", flexDirection: "column"}}>
+          {
+            portalItems.map(({title}) => <div key={`pi-${title}`}>{title}</div>)
+          }
+        </div>
       </div>
     </div>
   );
