@@ -88,6 +88,11 @@ const useMapTools = () => {
       | ImageryLayer
       | null;
 
+    if (findLayer(id)) {
+      console.log("i have that layer already")
+      return;
+    }
+
     switch (type) {
       case ESRI_LAYER_TYPES.PortalLayer:
         layer = (await Layer.fromPortalItem({
@@ -161,6 +166,8 @@ const useMapTools = () => {
       if (pixelFilter && layer instanceof ImageryLayer) {
         layer.pixelFilter = pixelFilter;
       }
+
+      console.log(layer, mapViewContext)
 
       mapViewContext?.map.add(layer);
     }

@@ -256,7 +256,7 @@ const Toolbar = (): JSX.Element => {
         </div>
         <div style={{display: "flex", gap: "3px", flexDirection: "column"}}>
           {
-            portalItems.map(({title}) => <div key={`pi-${title}`}>{title}</div>)
+            portalItems.map(({title}, i) => <div key={`pi-${title}-${i}`}>{title}</div>)
           }
         </div>
       </div>

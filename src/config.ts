@@ -10,6 +10,7 @@ import Fullscreen from "@arcgis/core/widgets/Fullscreen";
 import Home from "@arcgis/core/widgets/Home";
 import Legend from "@arcgis/core/widgets/Legend";
 import Print from "@arcgis/core/widgets/Print";
+import Editor from "@arcgis/core/widgets/Editor";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar";
 
 import {
@@ -133,6 +134,18 @@ export const MAP_DEFAULTS = {
         }),
       "top-left",
     ],
+    // [
+    //   (view) => new Editor({ view }), "top-left",
+    // ],
+    [
+      (view) =>
+        new Expand({
+          view,
+          content: new Editor({ view }),
+          expandIconClass: "esri-icon-layer-list",
+        }),
+      "top-left",
+    ],
   ] as Array<[(view: MapView | undefined) => string | any, string]>,
 };
 
@@ -172,6 +185,7 @@ export const LAYER_IDS = {
   CensusRedist: "census_redist",
   NLCDLandCover2001: "land_cover_2001",
   CharlotteLAS: "charlotte_las",
+  JaysonsMV: "jaysons_mv",
 };
 
 export const populationPieChart = () =>
@@ -303,6 +317,13 @@ export const populationDotDensity = (referenceScale: number) =>
   );
 
 export const LAYERS_CONFIG: LayersConfig = {
+  [LAYER_IDS.JaysonsMV]: {
+    url: "https://www.arcgis.com",
+    // url: "https://services.arcgis.com/EDxZDh4HqQ1a9KvA/arcgis/rest/services/jward_test/FeatureServer",
+    type: ESRI_LAYER_TYPES.PortalLayer,
+    portalId: "6f494d4cd38d4869b77e36fceb16a231",
+    id: LAYER_IDS.JaysonsMV
+  },
   [LAYER_IDS.CharlotteLAS]: {
     url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/CharlotteLAS/ImageServer",
     type: ESRI_LAYER_TYPES.ImageryLayer,
@@ -742,12 +763,13 @@ export const MAP_LAYERS: string[] = [
   // LAYER_IDS.SeattleDemographics,
   // LAYER_IDS.CensusBlocks,
   // LAYER_IDS.NLCDLandCover2001,
-  LAYER_IDS.CharlotteLAS,
-  LAYER_IDS.MvConservationAreas,
+  // LAYER_IDS.CharlotteLAS,
+  // LAYER_IDS.MvConservationAreas,
   // LAYER_IDS.MvTrails,
-  LAYER_IDS.MvBusStops,
+  // LAYER_IDS.MvBusStops,
   // LAYER_IDS.Population,
-  LAYER_IDS.MvTrailsArrows,
+  // LAYER_IDS.MvTrailsArrows,
+  LAYER_IDS.JaysonsMV,
   // LAYER_IDS.TrailHeadPois,
   // LAYER_IDS.CensusRedist
   // LAYER_IDS.Earthquakes
